@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Posts on Scholarstree</title>
+    <link>https://scholarstree.github.io/posts/</link>
+    <description>Recent content in Posts on Scholarstree</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 05 Jun 2019 20:17:37 +0530</lastBuildDate><atom:link href="https://scholarstree.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Training Policy Gradients</title>
+      <link>https://scholarstree.github.io/posts/2019-06-05-training-policy-gradients/2019-06-05-training-policy-gradients/</link>
+      <pubDate>Wed, 05 Jun 2019 20:17:37 +0530</pubDate>
+      
+      <guid>https://scholarstree.github.io/posts/2019-06-05-training-policy-gradients/2019-06-05-training-policy-gradients/</guid>
+      <description>This post focuses on results of variance reduction techniques viz. batch sizes, reward-to-go, discounted returns, baselines and advantage normalization for policy gradient algorithms on CartPole-v0 environment.</description>
+      <content:encoded><![CDATA[<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/policy_gradients_title.png#center"
+         alt="title"/> 
+</figure>
+
+<hr>
+<h3 id="__notations__"><strong>Notations</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th style="text-align:left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$s_t$</td>
+<td style="text-align:left">state at timestep $t$</td>
+</tr>
+<tr>
+<td>$a_t$</td>
+<td style="text-align:left">action taken in state $s_t$</td>
+</tr>
+<tr>
+<td>$r(a_t \vert s_t)$</td>
+<td style="text-align:left">reward after taking action $a_t$ in state $s_t$</td>
+</tr>
+<tr>
+<td>$\tau$</td>
+<td style="text-align:left">a trajectory, $(s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_{T-1}, a_{T-1}, r_{T-1}, s_T)$</td>
+</tr>
+<tr>
+<td>$r(\tau)$</td>
+<td style="text-align:left">$\sum_{t}r(a_{t}, s_{t})$</td>
+</tr>
+<tr>
+<td>$\pi_\theta(\tau)$</td>
+<td style="text-align:left">probability of tajectory $\tau$ under policy $\pi_\theta$ with parameters $\theta$</td>
+</tr>
+<tr>
+<td>$\gamma$</td>
+<td style="text-align:left">discount factor</td>
+</tr>
+</tbody>
+</table>
+<h3 id="__theory__"><strong>Theory</strong></h3>
+<p>Policy gradient methods try to solve reinforcement learning problems by modelling the policy as a parameterized function, generally a neural network. The policy network takes in observations as inputs and returns a distribution over available actions as output. An action from this distribution is sampled and a reward is received after the action is taken. The goal of policy gradient methods is to maximize (or minimize the negative of) an objective function which depends on the actions taken and rewards received over multiple timesteps. Our objective function, $J(θ)$ is the expectation of returns over all trajectories under policy $\pi_\theta$. We find the gradient of the objective functions w.r.t. the parameters of policy network and make updates.</p>
+<p>$$J(\theta) = \mathbb{E}_{\tau \sim \pi {\theta}(\tau)  \bigg[ \sum_tr(a_t, s_t) \bigg] \tag{1}\label{eq:1}}$$</p>
+<p>where,</p>
+<p>$$
+\begin{align}
+\pi_\theta(\tau) &amp;= p(s_1)\sum_{t=1}^{T} \pi_\theta(a_t \vert s_t)p(s_{t+1} \vert s_t, a_T) \newline
+\log \pi_\theta(\tau) &amp;= \log p(s_1) + \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) + \log p(s_{t+1} \vert s_t, a_T)
+\end{align}
+$$</p>
+<p>The gradient of $J(\theta)$ has the following form.</p>
+<p>$$
+= \mathbb{E}<em>{\tau \sim \pi {\theta}(\tau)} \bigg[ \bigg( \sum</em>{t=1}^{T} \nabla_\theta\log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{2}\label{eq:2}
+$$</p>
+<!-- $$
+\begin{align}
+    \nabla_\theta J(\theta)  &= \int \nabla_\theta \pi_\theta(\tau)r(\tau)d(\tau) 
+  \\ &= \int \pi_\theta(\tau) \nabla_\theta \log\pi_\theta(\tau)r(\tau)d(\tau)
+  \\ &= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \big[ \nabla_\theta \log\pi_\theta(\tau)r(\tau) \big]
+  \\ &= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \bigg[ \bigg(\sum_{t=1}^{T} \nabla_\theta\log\pi_\theta(a_t \vert s_t)\bigg) r(\tau) \bigg]
+  \\ &= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \bigg[ \bigg( \sum_{t=1}^{T} \nabla_\theta\log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{2}\label{eq:2}
+\end{align}
+$$ -->
+<p>Computing this expectation under a distribution over all trajectories is intractable, so we use sampling instead to make an approximation.</p>
+<p>$$\nabla_\theta J(\theta) \approx \frac {1}{N} \sum_{i=1}^{N} \bigg[ \bigg( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{3}\label{eq:3}$$</p>
+<p>A simple policy gradient algorithm repeats the following steps:</p>
+<ol>
+<li>Sample $\tau^{i}$ from $\pi_\theta(a_t \vert s_t)$</li>
+<li>Compute $\nabla_\theta J(\theta) \approx \frac {1}{N} \sum_{i} \big( ( \sum_{t} \nabla_\theta\log\pi_\theta(a_t \vert s_t) ) \sum_{t=1}^{T}r(a_{it}, s_{it}) \big)$</li>
+<li>Update $\theta \leftarrow \theta + \alpha \nabla_\theta J(\theta)$</li>
+</ol>
+<p>This simple algorithm is prone to variance. While training policy gradients, there are certain methods used to reduce such variance. These methods usually make small changes in the objective function. In the following sections, the effects of these methods is demonstrated on CartPole-v0 environment.</p>
+<p><strong>Practical consideration:</strong> Computing $\nabla_\theta\log\pi_\theta(a_t \vert s_t)$ explicitly is inefficient. We instead compute
+$$\tilde{J}(\theta) \approx \frac {1}{N} \sum_{i=1}^{N} \bigg[ \bigg( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{4}\label{eq:4}$$
+and use automatic differentiation to compute policy gradients.</p>
+<h3 id="__cartpole-v0__"><strong>CartPole-v0</strong></h3>
+<p><a href="https://github.com/openai/gym/wiki/CartPole-v0">CartPole-v0</a> is an OpenAI gym environment where a pole is attached to a cart. The cart can move along a frictionless track. The goal is to prevent the pole from falling.  CartPole-v0 observations are arrays of 4 values - cart position, cart velocity, pole angle and pole velocity at the top. The action is a discrete value - 0 (push cart to the left) or 1 (push cart to the right). The top limit on the number of steps that can occur in one episode is 200. There is another version, CartPole-v1 with 500 steps as max limit but experiments in this article will be based on CartPole-v0.</p>
+<h3 id="__experiment-details__"><strong>Experiment details</strong></h3>
+<ul>
+<li><strong>Policy network:</strong> inputs of dimensions (batch size, 4); 2 hidden layers of size 64 each; output dimensions of (batch size, 2); learning rate of 0.001 with Adam optimizer</li>
+<li><strong>Baseline network:</strong> input of dimensions (batch size, 4); 2 hidden layers of size 64 each; output dimensions of (batch size, 1); learning rate of 0.001 with Adam optimizer</li>
+<li><strong>Discount factor:</strong> 0.99</li>
+<li><strong>Random seeds:</strong> All experiments are performed thrice with numpy, pytorch and gym seeds as 0, 10 and 20. Results are averaged.</li>
+<li><strong>Number of iterations:</strong> 1000. One iteration means using a batch to make one policy update.</li>
+<li><strong>Plots:</strong> Average of returns in a batch vs iterations.</li>
+</ul>
+<h4 id="__batch-size__"><strong>Batch size</strong></h4>
+<p>Batch size refers to the number of timesteps used to make an update to policy network. When only a single timestep is used, the algorithm is called REINFORCE. Here, comparison is done between three batch sizes:</p>
+<ol>
+<li>At least 1. Only a single episode is run.</li>
+<li>At least 500. Episodes are run until we get 500 timesteps.</li>
+<li>At least 1000. Episodes are run until we get 1000 timesteps.</li>
+</ol>
+<p>It is possible that we receive required minimum timesteps (1, 500 or 1000) in the middle of an episode but we still run the episode till the end and use all the timesteps from that episode in the batch. This leads us to having some extra timsteps in our batch. If we stop the episode in the middle, then the returns we get will be lower than actual returns. Now, let&rsquo;s run our algorithm to maximize \eqref{eq:4}.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/2l_64s_1b_0na_0rtg_0nnb_0.99g_0.001lr.jpg#center"
+         alt="2l_64s_1b_0na_0rtg_0nnb_0.99g_0.001lr"/> <figcaption>
+            <p><em>Policy update using at least 1 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<p>We can see that average returns of the batches are not consistent and have a lot of variance. Also, notice that the results are sensitive to random seeds as well. On increasing the batch size to 500, we get a considerable reduction in variance and also, a faster increase in average returns.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/2l_64s_500b_0na_0rtg_0nnb_0.99g_0.001lr.jpg#center"
+         alt="2l_64s_500b_0na_0rtg_0nnb_0.99g_0.001lr"/> <figcaption>
+            <p><em>Policy update using at least 500 timesteps.</em></p>
+        </figcaption>
+</figure>
+
+<p>There are still inconsistencies around higher rewards. Using a batch size of 1000 gives us a smoother curve. These results were observed without using discounted returns. Next, we&rsquo;ll change our objective function to use causality and discounted returns.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/2l_64s_1000b_0na_0rtg_0nnb_0.99g_0.001lr.jpg#center"
+         alt="2l_64s_1000b_0na_0rtg_0nnb_0.99g_0.001lr"/> <figcaption>
+            <p><em>Policy update using at least 1000 timesteps.</em></p>
+        </figcaption>
+</figure>
+
+<h4 id="__causality-and-reward-to-go__"><strong>Causality and reward-to-go</strong></h4>
+<p>In the objective function used above, log probabilities of all taken actions are multiplied by sum of rewards. But policy at timestep $t&rsquo;$ cannot affect reward at timestep $t$ when $t &lt; t&rsquo;$. So we modify the objective function to:</p>
+<p>$$\tilde{J}(\theta) \approx \frac{1}{N}\sum_{i=1}^{N} \bigg(\sum_{t=1}^{T}\log\pi_\theta(a_{it}\vert s_{it})\bigg)\bigg(\sum_{t’=t}^{T} r(a_{it’}\vert s_{it’})\bigg)\tag{5}\label{eq:5}$$</p>
+<p>Also, rewards received much later in future should have lesser contribution to returns than rewards received in near future. So, we use discounted returns to incorporate this dynamic behaviour.</p>
+<p>$$\tilde{J}(\theta) \approx \frac{1}{N}\sum_{i=1}^{N} \bigg(\sum_{t=1}^{T}\log\pi_\theta(a_{it}\vert s_{it})\bigg)\bigg(\sum_{t’=t}^{T} \gamma^{t’-t} r(a_{it’}\vert s_{it’})\bigg)\tag{6}\label{eq:6}$$</p>
+<p>On using causality and reward-to-go, our policy learns faster and reaches the maximum of average returns in fewer timesteps.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/rtg_nortg_1.jpg#center"
+         alt="rtg_nortg_1"/> <figcaption>
+            <p><em>Reward-to-go (yellow) vs no reward-to-go (blue) using at least 1 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/rtg_nortg_500.jpg#center"
+         alt="rtg_nortg_500"/> <figcaption>
+            <p><em>Reward-to-go (yellow) vs no reward-to-go (blue) using at least 500 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/rtg_nortg_1000.jpg#center"
+         alt="rtg_nortg_1000"/> <figcaption>
+            <p><em>Reward-to-go (yellow) vs no reward-to-go (blue) using at least 1000 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<h4 id="__baselines__"><strong>Baselines</strong></h4>
+<p>A popular variation of the objective function to reduce variance of gradient function is to subtract a baseline from the returns. A common baseline to subtract is state-value function and the resulting value is called advantage.</p>
+<p>$$\tilde{J}(\theta) \approx \frac {1}{N} \sum_{i=1}^{N} \bigg[ \bigg( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \bigg) \bigg(\sum_{t&rsquo;=t}^{T}r(a_{it}, s_{it}) - b\bigg) \bigg]\tag{7}\label{eq:7}$$</p>
+<p>We now optimize \eqref{eq:7} using a neural network baseline</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/nnb_nonnb_1.jpg#center"
+         alt="nnb_nonnb_1"/> <figcaption>
+            <p><em>Baseline (yellow) vs no baseline (blue) using at least 1 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/nnb_nonnb_500.jpg#center"
+         alt="nnb_nonnb_500"/> <figcaption>
+            <p><em>Baseline (yellow) vs no baseline (blue) using at least 500 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/nnb_nonnb_1000.jpg#center"
+         alt="nnb_nonnb_1000"/> <figcaption>
+            <p><em>Baseline (yellow) vs no baseline (blue) using at least 1000 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<p>Training plots show that baseline method works better for large batch sizes. It does not seem to work with small batch sizes (or when our batch consists of only one episosde).</p>
+<h4 id="__advantage-normalization__"><strong>Advantage normalization</strong></h4>
+<p>Another trick to make policy gradients work is normalizing returns or advantage (in case of baselines). Following are the results of normalizing returns, baselines were not used in this case.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/na_nona_1.jpg#center"
+         alt="na_nona_1"/> <figcaption>
+            <p><em>Normalization (yellow) vs no normalization (blue) using at least 1 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/na_nona_500.jpg#center"
+         alt="na_nona_500"/> <figcaption>
+            <p><em>Normalization (yellow) vs no normalization (blue) using at least 500 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/na_nona_1000.jpg#center"
+         alt="na_nona_1000"/> <figcaption>
+            <p><em>Normalization (yellow) vs no normalization (blue) using at least 1000 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<h4 id="__final-result__"><strong>Final result</strong></h4>
+<p>This time we use everything we have in our toolset - causality, reward-to-go, baselines and advantage normalization.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/final.jpg#center"
+         alt="final"/> <figcaption>
+            <p><em>Using causality, reward-to-go, baselines and advantage normalization.</em></p>
+        </figcaption>
+</figure>
+
+<p>You can see that our small batch size is performing poorly due to added baseline.</p>
+<p>Is there a fix to make baseline work with smaller batches? So far, we have used the objective function of the form</p>
+<p>$$\tilde{J}(\theta) \approx \frac {1}{N} \sum_{i=1}^{N} \big[ \big( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \big) \sum_{t}r(a_{t}, s_{t}) \big]$$</p>
+<p>which can be thought of as an average of returns over sampled trajectories. We can instead use average of returns over all timesteps i.e.</p>
+<p>$$\tilde{J}(\theta) \approx \frac {1}{\tilde{T}} \sum_{i=1}^{N} \bigg[ \bigg( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{8}\label{eq:8}$$</p>
+<p>where $\tilde{T}$ is total timesteps in a batch. Optimizing \eqref{eq:8} fixes the baseline inconsistency for small batches.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_mean/final.jpg#center"
+         alt="final_mean"/> <figcaption>
+            <p><em>Using average of returns over all timesteps.</em></p>
+        </figcaption>
+</figure>
+
+<h3 id="__references__"><strong>References</strong></h3>
+<ol>
+<li><a href="http:////rail.eecs.berkeley.edu/deeprlcourse/">Berkeley Deep RL Course</a></li>
+<li><a href="https://lilianweng.github.io/lil-log/2018/04/08/policy-gradient-algorithms.html">Policy Gradient Algorithms</a></li>
+<li><a href="https://danieltakeshi.github.io/2017/03/28/going-deeper-into-reinforcement-learning-fundamentals-of-policy-gradients/">Going Deeper Into Reinforcement Learning: Fundamentals of Policy Gradients</a></li>
+</ol>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Tharoor It</title>
+      <link>https://scholarstree.github.io/posts/2018-04-27-tharoor-it/2018-04-27-tharoor-it/</link>
+      <pubDate>Fri, 27 Apr 2018 12:00:00 +0530</pubDate>
+      
+      <guid>https://scholarstree.github.io/posts/2018-04-27-tharoor-it/2018-04-27-tharoor-it/</guid>
+      <description>An application to calculate Tharoorian probability of some text.</description>
+      <content:encoded><![CDATA[<figure class="align-center ">
+    <img loading="lazy" src="/2018-04-27-tharoor-it/tharoor_it.png#center"
+         alt="tsne_title"/> 
+</figure>
+
+<hr>
+<p>I had recently started reading <a href="https://www.goodreads.com/book/show/32618967-an-era-of-darkness">An Era of Darkness: The British Empire in India</a> and was dazzled by <a href="http://www.shashitharoor.in/">Dr. Tharoor</a>&rsquo;s wizardry of words. He calls himself an amateur historian while painting an honest picture of British Raj in India. I was mesmerized by his writing and wondered if any underlying pattern could be found using Deep Learning. Hackfest, our annual college hackathon was also approaching around the time, so I decided to execute a project related to Dr. Tharoor&rsquo;s literature in 36 hours. So when the contest started, we were trying to build a Tharoorian text classifier.</p>
+<p>We planned to make a lightweight web application capable of taking a piece of text as input and estimating the probability of it being written by Dr. Tharoor. We were aware that it would be impossible to make a deployable model in just 36 hours. Nevertheless, we worked out a plan - Gather and process data, train a model, deploy on a local server and keep improving the model.</p>
+<h3 id="dataset">Dataset</h3>
+<p>We collected 10 of Dr. Tharoor&rsquo;s published books, extracted ~30,000 sentences and labeled them as 1 while  manually removing short sentences consisting of only a few words. We randomly picked some books for negative samples and labeled ~200,000 sentences as 0. <a href="https://nlp.stanford.edu/projects/glove/">100d GloVe embeddings</a> were used for creating the embedding matrix - vector representation of words in the dataset.</p>
+<table>
+<thead>
+<tr>
+<th>Sentence</th>
+<th style="text-align:center">Label</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The British Raj is scarcely ancient history.</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td>The reason was simple: India was governed for the benefit of Britain.</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td>By breaking the law non-violently he showed up the injustice of the law.</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td>This is not my fault.</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td>Grown-ups never understand anything by themselves, and it is exhausting for children to have to explain over and over again.</td>
+<td style="text-align:center">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="model">Model</h3>
+<p>We decided to use a Bidirectional <a href="http://colah.github.io/posts/2015-08-Understanding-LSTMs/">LSTM</a> for our purpose. Although we also tried 1D Convolutions which produced funny results. Training a bi-LSTM netowrk took 1 hour on our GPU. After our Keras model was trained, we exported it into a <code>.h5</code> file and used a flask server to <a href="https://blog.keras.io/building-a-simple-keras-deep-learning-rest-api.html">deploy it</a> to a local server.</p>
+<h3 id="results">Results</h3>
+<p>Although our model was a simple LSTM network without any attention, it gave decent predictions. Since the input to our network were single sentences only, it mostly depended upon presence of words to make predictions. Our training dataset only consisted of his books which kind of restricted our model&rsquo;s ability. Perhaps adding more data and using attention models would have given better results.</p>
+<table>
+<thead>
+<tr>
+<th>Sentence</th>
+<th style="text-align:center">Prediction(%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Earth is flat.</td>
+<td style="text-align:center">49.42</td>
+</tr>
+<tr>
+<td>I will build a great, great wall on our southern border, and I will have Mexico pay for that wall. Mark my words.</td>
+<td style="text-align:center">84.38</td>
+</tr>
+<tr>
+<td>There was an idea to bring together a group of remarkable people, so when we needed them, they could fight the battles that we never could.</td>
+<td style="text-align:center">96.64</td>
+</tr>
+<tr>
+<td>Exasperating farrago of distortions, misrepresentations &amp; outright lies being broadcast by an unprincipled showman masquerading as a journalist.</td>
+<td style="text-align:center">87.03</td>
+</tr>
+<tr>
+<td>Albus Dumbledore didn&rsquo;t seem to realize that he had just arrived in a street where everything from his name to his boots was unwelcome.</td>
+<td style="text-align:center">0.05</td>
+</tr>
+<tr>
+<td>The sheep are running wild.</td>
+<td style="text-align:center">2.83</td>
+</tr>
+<tr>
+<td>History is boring.</td>
+<td style="text-align:center">90.49</td>
+</tr>
+<tr>
+<td>Physics is boring.</td>
+<td style="text-align:center">37.65</td>
+</tr>
+<tr>
+<td>I is extremely tired of reading history.</td>
+<td style="text-align:center">22.47</td>
+</tr>
+</tbody>
+</table>
+<h3 id="conclusion">Conclusion</h3>
+<p>Our team secured 6th rank out of ~50 participants. Along with this project, we also attempted Samsung&rsquo;s Bixby challenge based on NLP and were 2nd runner-up.</p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>A Student&#39;s Guide to Assembling a Quadcopter</title>
+      <link>https://scholarstree.github.io/posts/2018-03-10-beginners-guide-to-assembling-a-drone/2018-03-10-beginners-guide-to-assembling-a-drone/</link>
+      <pubDate>Sat, 10 Mar 2018 12:00:00 +0530</pubDate>
+      
+      <guid>https://scholarstree.github.io/posts/2018-03-10-beginners-guide-to-assembling-a-drone/2018-03-10-beginners-guide-to-assembling-a-drone/</guid>
+      <description>Assembling, breaking, fixing, breaking and reassembling a quadcopter.</description>
+      <content:encoded><![CDATA[<figure class="align-center ">
+    <img loading="lazy" src="/2018-03-10-beginners-guide-to-assembling-a-drone/quad_comp.jpeg#center"
+         alt="quad_comp"/> <figcaption>
+            <p><em>Quadcopter Components</em></p>
+        </figcaption>
+</figure>
+
+<hr>
+<p>I&rsquo;ve spent my last six months assembling, breaking, fixing, breaking and reassembling a quadcopter. Before I started, I had assumed that the task would be easy but I had no idea about the effort it would take to make a copter fly. In this post, I share my experience which would probably save others from repeating my mistakes.</p>
+<h3 id="planning">Planning</h3>
+<p>Before purchasing the required components, it would be better to make an outline of the procedure to be followed. In my medium blog post, I listed a few problems to consider before getting started. It is a time consuming task. I spent a lot of time comparing the components before purchasing, reading documentations and watching youtube videos. I considered this as my side project and it soon turned out to be demanding.</p>
+<p>Needless to say, this would be an expensive project requiring contuinuous purchase of broken parts. Aproaching college administration might help; my project is funded by my project mentor but it took some time to secure it.</p>
+<p>As a beginner, it would be difficult to do all the tasks by oneself. I did not pay importance to the idea of adding more members to the team and it was probably the biggest mistake I made. Increasing team size is my current priority.</p>
+<p>Also, the goal of the project should be figured it out as early as possible and relative research should be started. We started out with a purpose of drone delivery and aerial photography, though I don&rsquo;t see it completed anytime soon. There needs to be a mental preparation for facing a lot of problems. There&rsquo;d be crashes, software bugs and innumerable incomprehensible hard-to-find-solutions-to problems. Sometimes, days would be spent trying to find a solution to a problem which would later turn out to be as simple as firmware update.</p>
+<h3 id="purchasing-components">Purchasing components</h3>
+<p>There are a few components that are essential for a quadcopter, rest are purpose dependent. I found <a href="https://in.udacity.com/course/flying-car-nanodegree--nd78">Flying Car Nanodegree&rsquo;s</a> first lesson a good source for introduction. What&rsquo;s necessary for a quadcopter is a frame, four motors, four ESCs, a flight controller, a transmitter, a receiver, a battery and a few sensors (an accelometer, a gyroscope and a compass). Optionally, one can add a GPS module, a companion computer, a camera, etc.</p>
+<p>Our copter currently has following components:</p>
+<ul>
+<li>1 x <a href="https://robokits.co.in/drones-quad-hexa-octa-fpv/frames-misc.-parts/r450-f450-quadrotor-frame-with-integraed-pcb-for-easy-wiring">Frame</a></li>
+<li>4 x <a href="https://robokits.co.in/motors/rc-brushless-motor-2212-1000kv-with-propeller-adaptor?cPath=116_118&amp;">Motor</a></li>
+<li>4 x <a href="https://robokits.co.in/motor-drives/brushless-dc/brushless-esc-30a-with-simonk-firmware-for-multirotors?cPath=116_118&amp;">ESC</a></li>
+<li>4 x Propeller</li>
+<li>1 x <a href="https://robokits.co.in/drones-quad-hexa-octa-fpv/radio-control-tx-rx/flysky-fs-i6-6ch-2.4ghz-transmitter-with-fs-ia6b-ppm-receiver">Transmitter+Receiver</a></li>
+<li>1 x <a href="https://robokits.co.in/drones-quad-hexa-octa-fpv/flight-controllers/pixhawk-px4-2.4.8-32bit-flight-controller-w-t-switch-and-sd-card">Pixhawk</a></li>
+<li>1 x <a href="https://robokits.co.in/drones-quad-hexa-octa-fpv/fpv-video-telemetry-osd/433mhz-telemetry-module-pair-for-pixhawk-and-apm-100mw-2km-range">Telemetry Module</a></li>
+<li>1 x <a href="https://www.amazon.in/gp/product/B00FE0OHKK/ref=oh_aui_detailpage_o02_s00?ie=UTF8&amp;psc=1">Lipo battery</a></li>
+</ul>
+<h3 id="understanding-the-components">Understanding the components</h3>
+<p>I had to watch a lot of youtube videos to understand the need and the order in which the components should be assembled. This is the reason one should start early; there&rsquo;s going to be a lot of research before you can begin assembling your copter.</p>
+<p>The frame holds all the components together. The copter has to be powered using a battery which would have direct connections to 4 motors (via ESCs) and a flight controller. The flight controller would manage power distribution to all other components - the transmitter, GPS module, onboard computer etc. Our frame has in-built power distribution connections. We soldered 4 ESCs to the board to attach them permanently. ESCs (Electronic Speed Controllers) are used to vary motor&rsquo;s speed and direction of rotation. Therefore, an ESC is needed for every motor.</p>
+<p>A motor is fixed on each leg of the copter and connected with their respective ESCs. It is important to not attach propellers till the end for safety purpose. Controlling the speed and direction of every motor manually would be cumbersome and inefficient. Therefore, a flight controller is used for the purpose; it has connection with all ESCs.</p>
+<p>A receiver is used to give commands to the copter from ground and a transmitter attached on the copter would receive those commands and send it to flight controller. The flight controller would then send appropriate commands to ESCs which in turn rotate the motors accordingly.</p>
+<p>A simple command would follow the following route:\
+Transmitter &ndash;&gt; Receiver &ndash;&gt; Flight Controller &ndash;&gt; ESCs &ndash;&gt;Motors</p>
+<p>Now, the frame has 4 motors, 4 ESCs, a flight controller, a transmitter, a receiver and a battery. We used Pixhawk as flight conmtroller which has inbuilt an accelerometer, a compass and a gyroscope, all of which have to be calibrated.</p>
+<h3 id="calibration">Calibration</h3>
+<p>All the sensors need to be calibrated to give flight controller the information about frame and the components. Calibration can be easily done using <a href="http://ardupilot.org/planner/">Mission Planner</a> which gives instructions for every step. You&rsquo;d need to connect to a computer via USB cable though. If you don&rsquo;t want to connect via USB you can use radio telemetry which allows you to connect Mission Planner to your copter using radio signals. Telemetry would consist of a receiver (connected to your computer via USB) and a transmitter (connected to fight controller on the copter). Connecting to your copter via telemetry will allow you to analyze various parameters like speed, altitude, remaining, battery in Mission Planner.</p>
+<p>We also need to bind our radio transmitter to receiver, calibrate ESCs and arm our copter before flying. All of these calibration methods will vary a little depending upon the kind of flight controller and other components you have. Reading documentation is the easiest way to figure out the steps required.</p>
+<h3 id="companion-computer">Companion computer</h3>
+<p>For onboard processing, a companion computer is added to the copter which can Raspbery Pi, Intel Edison, Nvidia TX, etc. We connected Raspberry Pi with pixhawk using mavproxy and dronekit-python. Dronekit-python allows to make and deploy apps on the copter.</p>
+<h3 id="flying-bugs">Flying bugs</h3>
+<p>Every time you want to fly, you&rsquo;d have to arm the copter which means checking all the components and starting power supply to the motors. Then, you&rsquo;re ready to use sticks in your transmitter to play with your copter. It sounds easy, but when we tried it out, it took us a few days to get it stable in the air. Following are the mistakes we made:</p>
+<h4 id="wrong-motor-spinning-direction">Wrong motor spinning direction</h4>
+<p>A quadcopter can have various frame types and each frame type would have different motor rotation configuration. In out X configutaion, diagonally opposite motors were supposed to be spinning in the same direction.</p>
+<h4 id="using-wrong-propellers">Using wrong propellers</h4>
+<p>There are two kinds of propellers - clockwise spinning and anticlockwise spinning and they go with their respecting motors.</p>
+<h4 id="poor-parameter-tuning">Poor parameter tuning</h4>
+<p>PID tuning is one of the most important step in stablizing a copter. We had been ignoring this step and it resulted in random crashes.</p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>t-SNE Visualization of Instagram Posts</title>
+      <link>https://scholarstree.github.io/posts/2018-02-03-tsne-visualization-of-instagram-posts/2018-02-03-tsne-visualization-of-instagram-posts/</link>
+      <pubDate>Sat, 03 Feb 2018 13:15:56 +0630</pubDate>
+      
+      <guid>https://scholarstree.github.io/posts/2018-02-03-tsne-visualization-of-instagram-posts/2018-02-03-tsne-visualization-of-instagram-posts/</guid>
+      <description>Visualization instagram images in a square grid.</description>
+      <content:encoded><![CDATA[<figure class="align-center ">
+    <img loading="lazy" src="/2018-02-03-tsne-visualization-of-instagram-posts/tsne_title.jpeg#center"
+         alt="tsne_title"/> 
+</figure>
+
+<hr>
+<p>A year ago, I read <a href="https://karpathy.github.io/2015/10/25/selfie/">Andrej&rsquo;s blog</a> post where he analyzed selfies using Convolutional Neural Networks. I was intrigued by the visualization technique he used which grouped images in such a way that nearby images were similar. In this post, I visualised my own collection of images in a square grid.</p>
+<h3 id="steps-involved">Steps Involved</h3>
+<p>t-Distributed Stochastic Neighbor Embedding (t-SNE) is a technique for visualizing high dimensional data in 2D or 3D. It defines a cost function between a joint probability distribution,P, in the high-dimensional space and a joint probability distribution, Q, in the low-dimensional space and minimizes that cost function. In this case, we&rsquo;re plotting images but it can be used with all other kinds of data.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2018-02-03-tsne-visualization-of-instagram-posts/tsne_mnist.png#center"
+         alt="tsne_mnist"/> <figcaption>
+            <p><em>t-SNE visualization of MNIST data.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2018-02-03-tsne-visualization-of-instagram-posts/tsne_mnist_grid.jpeg#center"
+         alt="tsne_jpeg"/> <figcaption>
+            <p><em>t-SNE visualization of MNIST data in a grid. (Not related to the previous visualization).</em></p>
+        </figcaption>
+</figure>
+
+<p>The full script can be found <a href="https://github.com/scholarstree/tsne-grid">here</a>. The script requires keras and tensorflow. It is tested with tensorflow (1.4.0) and keras (2.1.1).</p>
+<p><strong>Build model</strong>: VGG16 network (without top fc layers) is used and outputs of last conv block are flattened to form a vector.</p>
+<p><strong>Load images</strong>: All the images from the source directory are loaded.</p>
+<p><strong>Generate high dimensional representations</strong>: A single forward pass through the network generates the high dimensional representations.</p>
+<p><strong>Get 2D point locations</strong>: t-SNE implementation of scikit-learn converts these representations to 2D data points.</p>
+<p><strong>Distribute 2D representations in a square grid and save images</strong>: Finally, jonker-volgenant algorithm distributes these 2D points into a square grid and we assign every point in the grid a small image.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2018-02-03-tsne-visualization-of-instagram-posts/tsne_rand.jpeg#center"
+         alt="tsne_rand"/> <figcaption>
+            <p><em>t-SNE visualization of some random images in a grid.</em></p>
+        </figcaption>
+</figure>
+
+<h3 id="system-details">System Details</h3>
+<p>HP Pavilion<br>
+4 GB RAM<br>
+Nvidia GeForce GT 740M</p>
+<h3 id="__references__"><strong>References</strong></h3>
+<ol>
+<li>L.J.P. van der Maaten and G.E. Hinton. Visualizing High-Dimensional Data Using t-SNE. Journal of Machine Learning Research 9(Nov):2579–2605, 2008.<a href="https://lvdmaaten.github.io/publications/papers/JMLR_2008.pdf">[PDF]</a><a href="https://lvdmaaten.github.io/publications/misc/Supplement_JMLR_2008.pdf">[Supplemental material]</a><a href="https://www.youtube.com/watch?v=RJVL80Gg3lA&amp;list=UUtXKDgv1AVoG88PLl8nGXmw">[Talk]</a><a href="https://lvdmaaten.github.io/tsne/">[Code]</a></li>
+</ol>
+]]></content:encoded>
+    </item>
+    
+  </channel>
+</rss>

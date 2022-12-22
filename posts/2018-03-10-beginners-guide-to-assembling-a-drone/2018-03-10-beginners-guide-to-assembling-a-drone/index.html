@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>A Student&#39;s Guide to Assembling a Quadcopter | Scholarstree</title>
+<meta name="keywords" content="tech, quadcopter, drone">
+<meta name="description" content="Assembling, breaking, fixing, breaking and reassembling a quadcopter.">
+<meta name="author" content="">
+<link rel="canonical" href="https://scholarstree.github.io/posts/2018-03-10-beginners-guide-to-assembling-a-drone/2018-03-10-beginners-guide-to-assembling-a-drone/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.f2fd8ad7799e4ffbe9524adbf69f2789525e44b8d40c13b4a83d68bd4981fc8d.css" integrity="sha256-8v2K13meT/vpUkrb9p8niVJeRLjUDBO0qD1ovUmB/I0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://scholarstree.github.io/favicon.ico">
+<link rel="apple-touch-icon" href="https://scholarstree.github.io/apple-touch-icon.png">
+
+<meta name="twitter:title" content="A Student&#39;s Guide to Assembling a Quadcopter | Scholarstree" />
+<meta name="twitter:description" content="Assembling, breaking, fixing, breaking and reassembling a quadcopter." />
+<meta property="og:title" content="A Student&#39;s Guide to Assembling a Quadcopter | Scholarstree" />
+<meta property="og:description" content="Assembling, breaking, fixing, breaking and reassembling a quadcopter." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://scholarstree.github.io/posts/2018-03-10-beginners-guide-to-assembling-a-drone/2018-03-10-beginners-guide-to-assembling-a-drone/" />
+<meta property="article:section" content="posts" />
+  <meta property="article:published_time" content="2018-03-10T12:00:00&#43;05:30" />
+  <meta property="article:modified_time" content="2018-03-10T12:00:00&#43;05:30" />
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://scholarstree.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "A Student's Guide to Assembling a Quadcopter",
+      "item": "https://scholarstree.github.io/posts/2018-03-10-beginners-guide-to-assembling-a-drone/2018-03-10-beginners-guide-to-assembling-a-drone/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A Student's Guide to Assembling a Quadcopter | Scholarstree",
+  "name": "A Student\u0027s Guide to Assembling a Quadcopter",
+  "description": "Assembling, breaking, fixing, breaking and reassembling a quadcopter.",
+  "keywords": [
+    "tech", "quadcopter", "drone"
+  ],
+  "wordCount" : "1071",
+  "inLanguage": "en",
+  "datePublished": "2018-03-10T12:00:00+05:30",
+  "dateModified": "2018-03-10T12:00:00+05:30",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://scholarstree.github.io/posts/2018-03-10-beginners-guide-to-assembling-a-drone/2018-03-10-beginners-guide-to-assembling-a-drone/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Scholarstree",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://scholarstree.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+
+
+
+<style>
+    #icons {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 2em;
+    }
+    #icons .item {
+      width: 80px;
+      height: 50px;
+      margin: 10px;
+    }
+    #icons .item .name {
+      font-size: 12px;
+      user-select: all;
+      text-align: center;
+    }
+    #icons .item .icon {
+      display: flex;
+      justify-content: center;
+    }
+    #icons .item svg {
+      width: 30px;
+      height: 30px;
+    }
+  </style>
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary-bg: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list-page {
+                background: var(--theme);
+            }
+
+            .list-page:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list-page:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+</head>
+
+<body class=" type-posts kind-page layout-" id="top"><script data-no-instant>
+function switchTheme(theme) {
+  switch (theme) {
+    case 'light':
+      document.body.classList.remove('dark');
+      break;
+    case 'dark':
+      document.body.classList.add('dark');
+      break;
+    
+    default:
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+      }
+  }
+}
+
+function isDarkTheme() {
+  return document.body.className.includes("dark");
+}
+
+function getPrefTheme() {
+  return localStorage.getItem("pref-theme");
+}
+
+function setPrefTheme(theme) {
+  switchTheme(theme)
+  localStorage.setItem("pref-theme", theme);
+}
+
+const toggleThemeCallbacks = {}
+toggleThemeCallbacks['main'] = (isDark) => {
+  
+  if (isDark) {
+    setPrefTheme('light');
+  } else {
+    setPrefTheme('dark');
+  }
+}
+
+
+
+
+window.addEventListener('toggle-theme', function() {
+  
+  const isDark = isDarkTheme()
+  for (const key in toggleThemeCallbacks) {
+    toggleThemeCallbacks[key](isDark)
+  }
+});
+
+
+function toggleThemeListener() {
+  
+  window.dispatchEvent(new CustomEvent('toggle-theme'));
+}
+
+</script>
+<script>
+  
+  (function() {
+    const defaultTheme = 'auto';
+    const prefTheme = getPrefTheme();
+    const theme = prefTheme ? prefTheme : defaultTheme;
+
+    switchTheme(theme);
+  })();
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://scholarstree.github.io/" accesskey="h" title="Scholarstree (Alt + H)">Scholarstree</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://scholarstree.github.io/categories/" title="Categories"
+                >Categories
+                </a>
+            </li>
+            <li>
+                <a href="https://scholarstree.github.io/tags/" title="Tags"
+                >Tags
+                </a>
+            </li>
+            <li>
+                <a href="https://scholarstree.github.io/archives/" title="Archive"
+                >Archive
+                </a>
+            </li>
+            <li>
+                <a href="https://scholarstree.github.io/search/" title="Search (Alt &#43; /)"data-no-instant accesskey=/
+                >Search
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main post">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://scholarstree.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://scholarstree.github.io/posts/">Posts</a></div><h1 class="post-title">A Student&#39;s Guide to Assembling a Quadcopter</h1>
+    <div class="post-description">Assembling, breaking, fixing, breaking and reassembling a quadcopter.</div>
+    <div class="post-meta"><span class="meta-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar" style="user-select: text;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" style="user-select: text;"></rect><line x1="16" y1="2" x2="16" y2="6" style="user-select: text;"></line><line x1="8" y1="2" x2="8" y2="6" style="user-select: text;"></line><line x1="3" y1="10" x2="21" y2="10" style="user-select: text;"></line></svg>
+  <span>March 10, 2018</span></span><span class="meta-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon" style="user-select: text;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" style="user-select: text;"></path><line x1="7" y1="7" x2="7" y2="7" style="user-select: text;"></line></svg>
+  <span class="post-tags"><a href="https://scholarstree.github.io/tags/tech/">tech</a><a href="https://scholarstree.github.io/tags/quadcopter/">quadcopter</a><a href="https://scholarstree.github.io/tags/drone/">drone</a></span></span><span class="meta-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 15"></polyline></svg>
+  <span>6 min</span></span>
+
+      
+      
+    </div>
+  </header> <div class="toc side left">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#planning" aria-label="Planning">Planning</a></li>
+                <li>
+                    <a href="#purchasing-components" aria-label="Purchasing components">Purchasing components</a></li>
+                <li>
+                    <a href="#understanding-the-components" aria-label="Understanding the components">Understanding the components</a></li>
+                <li>
+                    <a href="#calibration" aria-label="Calibration">Calibration</a></li>
+                <li>
+                    <a href="#companion-computer" aria-label="Companion computer">Companion computer</a></li>
+                <li>
+                    <a href="#flying-bugs" aria-label="Flying bugs">Flying bugs</a><ul>
+                        
+                <li>
+                    <a href="#wrong-motor-spinning-direction" aria-label="Wrong motor spinning direction">Wrong motor spinning direction</a></li>
+                <li>
+                    <a href="#using-wrong-propellers" aria-label="Using wrong propellers">Using wrong propellers</a></li>
+                <li>
+                    <a href="#poor-parameter-tuning" aria-label="Poor parameter tuning">Poor parameter tuning</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><figure class="align-center ">
+    <img loading="lazy" src="/2018-03-10-beginners-guide-to-assembling-a-drone/quad_comp.jpeg#center"
+         alt="quad_comp"/> <figcaption>
+            <p><em>Quadcopter Components</em></p>
+        </figcaption>
+</figure>
+
+<hr>
+<p>I&rsquo;ve spent my last six months assembling, breaking, fixing, breaking and reassembling a quadcopter. Before I started, I had assumed that the task would be easy but I had no idea about the effort it would take to make a copter fly. In this post, I share my experience which would probably save others from repeating my mistakes.</p>
+<h3 id="planning">Planning</h3>
+<p>Before purchasing the required components, it would be better to make an outline of the procedure to be followed. In my medium blog post, I listed a few problems to consider before getting started. It is a time consuming task. I spent a lot of time comparing the components before purchasing, reading documentations and watching youtube videos. I considered this as my side project and it soon turned out to be demanding.</p>
+<p>Needless to say, this would be an expensive project requiring contuinuous purchase of broken parts. Aproaching college administration might help; my project is funded by my project mentor but it took some time to secure it.</p>
+<p>As a beginner, it would be difficult to do all the tasks by oneself. I did not pay importance to the idea of adding more members to the team and it was probably the biggest mistake I made. Increasing team size is my current priority.</p>
+<p>Also, the goal of the project should be figured it out as early as possible and relative research should be started. We started out with a purpose of drone delivery and aerial photography, though I don&rsquo;t see it completed anytime soon. There needs to be a mental preparation for facing a lot of problems. There&rsquo;d be crashes, software bugs and innumerable incomprehensible hard-to-find-solutions-to problems. Sometimes, days would be spent trying to find a solution to a problem which would later turn out to be as simple as firmware update.</p>
+<h3 id="purchasing-components">Purchasing components</h3>
+<p>There are a few components that are essential for a quadcopter, rest are purpose dependent. I found <a href="https://in.udacity.com/course/flying-car-nanodegree--nd78">Flying Car Nanodegree&rsquo;s</a> first lesson a good source for introduction. What&rsquo;s necessary for a quadcopter is a frame, four motors, four ESCs, a flight controller, a transmitter, a receiver, a battery and a few sensors (an accelometer, a gyroscope and a compass). Optionally, one can add a GPS module, a companion computer, a camera, etc.</p>
+<p>Our copter currently has following components:</p>
+<ul>
+<li>1 x <a href="https://robokits.co.in/drones-quad-hexa-octa-fpv/frames-misc.-parts/r450-f450-quadrotor-frame-with-integraed-pcb-for-easy-wiring">Frame</a></li>
+<li>4 x <a href="https://robokits.co.in/motors/rc-brushless-motor-2212-1000kv-with-propeller-adaptor?cPath=116_118&amp;">Motor</a></li>
+<li>4 x <a href="https://robokits.co.in/motor-drives/brushless-dc/brushless-esc-30a-with-simonk-firmware-for-multirotors?cPath=116_118&amp;">ESC</a></li>
+<li>4 x Propeller</li>
+<li>1 x <a href="https://robokits.co.in/drones-quad-hexa-octa-fpv/radio-control-tx-rx/flysky-fs-i6-6ch-2.4ghz-transmitter-with-fs-ia6b-ppm-receiver">Transmitter+Receiver</a></li>
+<li>1 x <a href="https://robokits.co.in/drones-quad-hexa-octa-fpv/flight-controllers/pixhawk-px4-2.4.8-32bit-flight-controller-w-t-switch-and-sd-card">Pixhawk</a></li>
+<li>1 x <a href="https://robokits.co.in/drones-quad-hexa-octa-fpv/fpv-video-telemetry-osd/433mhz-telemetry-module-pair-for-pixhawk-and-apm-100mw-2km-range">Telemetry Module</a></li>
+<li>1 x <a href="https://www.amazon.in/gp/product/B00FE0OHKK/ref=oh_aui_detailpage_o02_s00?ie=UTF8&amp;psc=1">Lipo battery</a></li>
+</ul>
+<h3 id="understanding-the-components">Understanding the components</h3>
+<p>I had to watch a lot of youtube videos to understand the need and the order in which the components should be assembled. This is the reason one should start early; there&rsquo;s going to be a lot of research before you can begin assembling your copter.</p>
+<p>The frame holds all the components together. The copter has to be powered using a battery which would have direct connections to 4 motors (via ESCs) and a flight controller. The flight controller would manage power distribution to all other components - the transmitter, GPS module, onboard computer etc. Our frame has in-built power distribution connections. We soldered 4 ESCs to the board to attach them permanently. ESCs (Electronic Speed Controllers) are used to vary motor&rsquo;s speed and direction of rotation. Therefore, an ESC is needed for every motor.</p>
+<p>A motor is fixed on each leg of the copter and connected with their respective ESCs. It is important to not attach propellers till the end for safety purpose. Controlling the speed and direction of every motor manually would be cumbersome and inefficient. Therefore, a flight controller is used for the purpose; it has connection with all ESCs.</p>
+<p>A receiver is used to give commands to the copter from ground and a transmitter attached on the copter would receive those commands and send it to flight controller. The flight controller would then send appropriate commands to ESCs which in turn rotate the motors accordingly.</p>
+<p>A simple command would follow the following route:\
+Transmitter &ndash;&gt; Receiver &ndash;&gt; Flight Controller &ndash;&gt; ESCs &ndash;&gt;Motors</p>
+<p>Now, the frame has 4 motors, 4 ESCs, a flight controller, a transmitter, a receiver and a battery. We used Pixhawk as flight conmtroller which has inbuilt an accelerometer, a compass and a gyroscope, all of which have to be calibrated.</p>
+<h3 id="calibration">Calibration</h3>
+<p>All the sensors need to be calibrated to give flight controller the information about frame and the components. Calibration can be easily done using <a href="http://ardupilot.org/planner/">Mission Planner</a> which gives instructions for every step. You&rsquo;d need to connect to a computer via USB cable though. If you don&rsquo;t want to connect via USB you can use radio telemetry which allows you to connect Mission Planner to your copter using radio signals. Telemetry would consist of a receiver (connected to your computer via USB) and a transmitter (connected to fight controller on the copter). Connecting to your copter via telemetry will allow you to analyze various parameters like speed, altitude, remaining, battery in Mission Planner.</p>
+<p>We also need to bind our radio transmitter to receiver, calibrate ESCs and arm our copter before flying. All of these calibration methods will vary a little depending upon the kind of flight controller and other components you have. Reading documentation is the easiest way to figure out the steps required.</p>
+<h3 id="companion-computer">Companion computer</h3>
+<p>For onboard processing, a companion computer is added to the copter which can Raspbery Pi, Intel Edison, Nvidia TX, etc. We connected Raspberry Pi with pixhawk using mavproxy and dronekit-python. Dronekit-python allows to make and deploy apps on the copter.</p>
+<h3 id="flying-bugs">Flying bugs</h3>
+<p>Every time you want to fly, you&rsquo;d have to arm the copter which means checking all the components and starting power supply to the motors. Then, you&rsquo;re ready to use sticks in your transmitter to play with your copter. It sounds easy, but when we tried it out, it took us a few days to get it stable in the air. Following are the mistakes we made:</p>
+<h4 id="wrong-motor-spinning-direction">Wrong motor spinning direction</h4>
+<p>A quadcopter can have various frame types and each frame type would have different motor rotation configuration. In out X configutaion, diagonally opposite motors were supposed to be spinning in the same direction.</p>
+<h4 id="using-wrong-propellers">Using wrong propellers</h4>
+<p>There are two kinds of propellers - clockwise spinning and anticlockwise spinning and they go with their respecting motors.</p>
+<h4 id="poor-parameter-tuning">Poor parameter tuning</h4>
+<p>PID tuning is one of the most important step in stablizing a copter. We had been ignoring this step and it resulted in random crashes.</p>
+
+  </div>
+
+  <footer class="post-footer">
+<nav class="paginav">
+  <a class="prev" href="https://scholarstree.github.io/posts/2018-04-27-tharoor-it/2018-04-27-tharoor-it/">
+    <span class="title">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left" style="user-select: text;"><line x1="19" y1="12" x2="5" y2="12" style="user-select: text;"></line><polyline points="12 19 5 12 12 5" style="user-select: text;"></polyline></svg>&nbsp;Prev Page</span>
+    <br>
+    <span>Tharoor It</span>
+  </a>
+  <a class="next" href="https://scholarstree.github.io/posts/2018-02-03-tsne-visualization-of-instagram-posts/2018-02-03-tsne-visualization-of-instagram-posts/">
+    <span class="title">Next Page&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right" style="user-select: text;"><line x1="5" y1="12" x2="19" y2="12" style="user-select: text;"></line><polyline points="12 5 19 12 12 19" style="user-select: text;"></polyline></svg>
+    </span>
+    <br>
+    <span>t-SNE Visualization of Instagram Posts</span>
+  </a>
+</nav>
+
+  </footer><div class="comments-box">
+  <div id="disqus_thread"></div>
+</div>
+
+<script type="text/javascript">
+  var disqus_config = function () {
+    this.page.url = 'https:\/\/scholarstree.github.io\/posts\/2018-03-10-beginners-guide-to-assembling-a-drone\/2018-03-10-beginners-guide-to-assembling-a-drone\/';  
+    this.page.identifier = '2018-03-10-beginners-guide-to-assembling-a-drone'; 
+  };
+
+  (function () {
+    const disqus = window.DISQUS
+    if (disqus) {
+      
+      
+      disqus.reset({
+        reload: true,
+        config: disqus_config,
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = '//' + 'scholarstree' + '.disqus.com/embed.js';
+      s.defer = true;
+      s.setAttribute('data-timestamp', +new Date());
+      
+      s.setAttribute('data-no-instant', '')
+      d.head.appendChild(s);
+    }
+  })();
+</script>
+
+</article>
+    </main>
+    
+<footer class="footer">
+  <span>&copy; 2022 <a href="https://scholarstree.github.io/">Scholarstree</a></span><span style="display: inline-block; margin-left: 1em;">
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/"></a>
+  </span>
+  <span style="display: inline-block; margin-left: 1em;">
+    Powered by
+    <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+    <a href="https://github.com/reorx/hugo-PaperModX/" rel="noopener" target="_blank">PaperModX</a>
+  </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+    <path d="M12 6H0l6-6z" />
+  </svg>
+</a>
+
+<script>
+  (function() {
+     
+    const disableThemeToggle = '' == '1';
+    if (disableThemeToggle) {
+      return;
+    }
+
+    let button = document.getElementById("theme-toggle")
+    
+    button.removeEventListener('click', toggleThemeListener)
+    
+    button.addEventListener('click', toggleThemeListener)
+  })();
+</script>
+
+<script>
+  (function () {
+    let menu = document.getElementById('menu')
+    if (menu) {
+      menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+      menu.onscroll = function () {
+        localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+      }
+    }
+
+    const disableSmoothScroll = '' == '1';
+    const enableInstantClick = '1' == '1';
+    
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || disableSmoothScroll || enableInstantClick) {
+      return;
+    }
+    
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener("click", function (e) {
+        e.preventDefault();
+        var id = this.getAttribute("href").substr(1);
+        document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+          behavior: "smooth"
+        });
+        if (id === "top") {
+          history.replaceState(null, null, " ");
+        } else {
+          history.pushState(null, null, `#${id}`);
+        }
+      });
+    });
+  })();
+</script>
+<script>
+  var mybutton = document.getElementById("top-link");
+  window.onscroll = function () {
+    if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+      mybutton.style.visibility = "visible";
+      mybutton.style.opacity = "1";
+    } else {
+      mybutton.style.visibility = "hidden";
+      mybutton.style.opacity = "0";
+    }
+  };
+</script>
+<script>
+  if (window.scrollListeners) {
+    
+    for (const listener of scrollListeners) {
+      window.removeEventListener('scroll', listener)
+    }
+  }
+  window.scrollListeners = []
+</script>
+
+
+
+<script src="/js/medium-zoom.min.js" data-no-instant
+></script>
+<script>
+  document.querySelectorAll('pre > code').forEach((codeblock) => {
+    const container = codeblock.parentNode.parentNode;
+
+    const copybutton = document.createElement('button');
+    copybutton.classList.add('copy-code');
+    copybutton.innerText = 'copy';
+
+    function copyingDone() {
+      copybutton.innerText = 'copied!';
+      setTimeout(() => {
+        copybutton.innerText = 'copy';
+      }, 2000);
+    }
+
+    copybutton.addEventListener('click', (cb) => {
+      if ('clipboard' in navigator) {
+        navigator.clipboard.writeText(codeblock.textContent);
+        copyingDone();
+        return;
+      }
+
+      const range = document.createRange();
+      range.selectNodeContents(codeblock);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      try {
+        document.execCommand('copy');
+        copyingDone();
+      } catch (e) { };
+      selection.removeRange(range);
+    });
+
+    if (container.classList.contains("highlight")) {
+      container.appendChild(copybutton);
+    } else if (container.parentNode.firstChild == container) {
+      
+    } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+      
+      codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+    } else {
+      
+      codeblock.parentNode.appendChild(copybutton);
+    }
+  });
+</script>
+
+
+
+
+<script>
+  
+  
+  (function() {
+    const enableTocScroll = '1' == '1'
+    if (!enableTocScroll) {
+      return
+    }
+    if (!document.querySelector('.toc')) {
+      console.log('no toc found, ignore toc scroll')
+      return
+    }
+    
+
+    
+    const scrollListeners = window.scrollListeners
+    const headings = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id]');
+    const activeClass = 'active';
+
+    
+    let activeHeading = headings[0];
+    getLinkByHeading(activeHeading).classList.add(activeClass);
+
+    const onScroll = () => {
+      const passedHeadings = [];
+      for (const h of headings) {
+        
+        if (getOffsetTop(h) < 5) {
+          passedHeadings.push(h)
+        } else {
+          break;
+        }
+      }
+      if (passedHeadings.length > 0) {
+        newActiveHeading = passedHeadings[passedHeadings.length - 1];
+      } else {
+        newActiveHeading = headings[0];
+      }
+      if (activeHeading != newActiveHeading) {
+        getLinkByHeading(activeHeading).classList.remove(activeClass);
+        activeHeading = newActiveHeading;
+        getLinkByHeading(activeHeading).classList.add(activeClass);
+      }
+    }
+
+    let timer = null;
+    const scrollListener = () => {
+      if (timer !== null) {
+        clearTimeout(timer)
+      }
+      timer = setTimeout(onScroll, 50)
+    }
+    window.addEventListener('scroll', scrollListener, false);
+    scrollListeners.push(scrollListener)
+
+    function getLinkByHeading(heading) {
+      const id = encodeURI(heading.getAttribute('id')).toLowerCase();
+      return document.querySelector(`.toc ul li a[href="#${id}"]`);
+    }
+
+    function getOffsetTop(heading) {
+      if (!heading.getClientRects().length) {
+        return 0;
+      }
+      let rect = heading.getBoundingClientRect();
+      return rect.top
+    }
+  })();
+  </script>
+<script>
+  mediumZoom('.entry-cover img');
+  mediumZoom('.post-content img:not([no-zoom])');
+</script>
+
+<script src="/js/instantclick.min.js" data-no-instant
+></script>
+<script data-no-instant>
+  
+  
+  
+  
+  
+  
+  InstantClick.init();
+</script>
+</body>
+
+</html>

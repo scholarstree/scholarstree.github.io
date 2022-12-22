@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Training Policy Gradients | Scholarstree</title>
+<meta name="keywords" content="rl, policygradients">
+<meta name="description" content="This post focuses on results of variance reduction techniques viz. batch sizes, reward-to-go, discounted returns, baselines and advantage normalization for policy gradient algorithms on CartPole-v0 environment.">
+<meta name="author" content="">
+<link rel="canonical" href="https://scholarstree.github.io/posts/2019-06-05-training-policy-gradients/2019-06-05-training-policy-gradients/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.f2fd8ad7799e4ffbe9524adbf69f2789525e44b8d40c13b4a83d68bd4981fc8d.css" integrity="sha256-8v2K13meT/vpUkrb9p8niVJeRLjUDBO0qD1ovUmB/I0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://scholarstree.github.io/favicon.ico">
+<link rel="apple-touch-icon" href="https://scholarstree.github.io/apple-touch-icon.png">
+
+<meta name="twitter:title" content="Training Policy Gradients | Scholarstree" />
+<meta name="twitter:description" content="This post focuses on results of variance reduction techniques viz. batch sizes, reward-to-go, discounted returns, baselines and advantage normalization for policy gradient algorithms on CartPole-v0 environment." />
+<meta property="og:title" content="Training Policy Gradients | Scholarstree" />
+<meta property="og:description" content="This post focuses on results of variance reduction techniques viz. batch sizes, reward-to-go, discounted returns, baselines and advantage normalization for policy gradient algorithms on CartPole-v0 environment." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://scholarstree.github.io/posts/2019-06-05-training-policy-gradients/2019-06-05-training-policy-gradients/" />
+<meta property="article:section" content="posts" />
+  <meta property="article:published_time" content="2019-06-05T20:17:37&#43;05:30" />
+  <meta property="article:modified_time" content="2019-06-05T20:17:37&#43;05:30" />
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://scholarstree.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Training Policy Gradients",
+      "item": "https://scholarstree.github.io/posts/2019-06-05-training-policy-gradients/2019-06-05-training-policy-gradients/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Training Policy Gradients | Scholarstree",
+  "name": "Training Policy Gradients",
+  "description": "This post focuses on results of variance reduction techniques viz. batch sizes, reward-to-go, discounted returns, baselines and advantage normalization for policy gradient algorithms on CartPole-v0 environment.",
+  "keywords": [
+    "rl", "policygradients"
+  ],
+  "wordCount" : "1356",
+  "inLanguage": "en",
+  "datePublished": "2019-06-05T20:17:37+05:30",
+  "dateModified": "2019-06-05T20:17:37+05:30",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://scholarstree.github.io/posts/2019-06-05-training-policy-gradients/2019-06-05-training-policy-gradients/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Scholarstree",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://scholarstree.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+
+
+  <script type="text/javascript">
+    MathJax = {
+      tex: {
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+      },
+    };
+  </script>
+  <script
+      async
+      id="MathJax-script"
+      src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"
+      integrity="sha384-+BSz3oj3ILMYvOBr16U9i0H4RZRmGyQQ+1q9eqr8T3skmAFrJk8GmgwgqlCZdNSo"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+      type="text/javascript">
+</script>
+
+
+<style>
+    #icons {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 2em;
+    }
+    #icons .item {
+      width: 80px;
+      height: 50px;
+      margin: 10px;
+    }
+    #icons .item .name {
+      font-size: 12px;
+      user-select: all;
+      text-align: center;
+    }
+    #icons .item .icon {
+      display: flex;
+      justify-content: center;
+    }
+    #icons .item svg {
+      width: 30px;
+      height: 30px;
+    }
+  </style>
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary-bg: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list-page {
+                background: var(--theme);
+            }
+
+            .list-page:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list-page:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+
+</head>
+
+<body class=" type-posts kind-page layout-post" id="top"><script data-no-instant>
+function switchTheme(theme) {
+  switch (theme) {
+    case 'light':
+      document.body.classList.remove('dark');
+      break;
+    case 'dark':
+      document.body.classList.add('dark');
+      break;
+    
+    default:
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+      }
+  }
+}
+
+function isDarkTheme() {
+  return document.body.className.includes("dark");
+}
+
+function getPrefTheme() {
+  return localStorage.getItem("pref-theme");
+}
+
+function setPrefTheme(theme) {
+  switchTheme(theme)
+  localStorage.setItem("pref-theme", theme);
+}
+
+const toggleThemeCallbacks = {}
+toggleThemeCallbacks['main'] = (isDark) => {
+  
+  if (isDark) {
+    setPrefTheme('light');
+  } else {
+    setPrefTheme('dark');
+  }
+}
+
+
+
+
+window.addEventListener('toggle-theme', function() {
+  
+  const isDark = isDarkTheme()
+  for (const key in toggleThemeCallbacks) {
+    toggleThemeCallbacks[key](isDark)
+  }
+});
+
+
+function toggleThemeListener() {
+  
+  window.dispatchEvent(new CustomEvent('toggle-theme'));
+}
+
+</script>
+<script>
+  
+  (function() {
+    const defaultTheme = 'auto';
+    const prefTheme = getPrefTheme();
+    const theme = prefTheme ? prefTheme : defaultTheme;
+
+    switchTheme(theme);
+  })();
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://scholarstree.github.io/" accesskey="h" title="Scholarstree (Alt + H)">Scholarstree</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://scholarstree.github.io/categories/" title="Categories"
+                >Categories
+                </a>
+            </li>
+            <li>
+                <a href="https://scholarstree.github.io/tags/" title="Tags"
+                >Tags
+                </a>
+            </li>
+            <li>
+                <a href="https://scholarstree.github.io/archives/" title="Archive"
+                >Archive
+                </a>
+            </li>
+            <li>
+                <a href="https://scholarstree.github.io/search/" title="Search (Alt &#43; /)"data-no-instant accesskey=/
+                >Search
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main post">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://scholarstree.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://scholarstree.github.io/posts/">Posts</a></div><h1 class="post-title">Training Policy Gradients</h1>
+    <div class="post-description">This post focuses on results of variance reduction techniques viz. batch sizes, reward-to-go, discounted returns, baselines and advantage normalization for policy gradient algorithms on CartPole-v0 environment.</div>
+    <div class="post-meta"><span class="meta-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar" style="user-select: text;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" style="user-select: text;"></rect><line x1="16" y1="2" x2="16" y2="6" style="user-select: text;"></line><line x1="8" y1="2" x2="8" y2="6" style="user-select: text;"></line><line x1="3" y1="10" x2="21" y2="10" style="user-select: text;"></line></svg>
+  <span>June 5, 2019</span></span><span class="meta-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon" style="user-select: text;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" style="user-select: text;"></path><line x1="7" y1="7" x2="7" y2="7" style="user-select: text;"></line></svg>
+  <span class="post-tags"><a href="https://scholarstree.github.io/tags/rl/">rl</a><a href="https://scholarstree.github.io/tags/policygradients/">policygradients</a></span></span><span class="meta-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 15"></polyline></svg>
+  <span>7 min</span></span>
+
+      
+      
+    </div>
+  </header> <div class="toc side left">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#__notations__" aria-label="Notations"><strong>Notations</strong></a></li>
+                <li>
+                    <a href="#__theory__" aria-label="Theory"><strong>Theory</strong></a></li>
+                <li>
+                    <a href="#__cartpole-v0__" aria-label="CartPole-v0"><strong>CartPole-v0</strong></a></li>
+                <li>
+                    <a href="#__experiment-details__" aria-label="Experiment details"><strong>Experiment details</strong></a><ul>
+                        
+                <li>
+                    <a href="#__batch-size__" aria-label="Batch size"><strong>Batch size</strong></a></li>
+                <li>
+                    <a href="#__causality-and-reward-to-go__" aria-label="Causality and reward-to-go"><strong>Causality and reward-to-go</strong></a></li>
+                <li>
+                    <a href="#__baselines__" aria-label="Baselines"><strong>Baselines</strong></a></li>
+                <li>
+                    <a href="#__advantage-normalization__" aria-label="Advantage normalization"><strong>Advantage normalization</strong></a></li>
+                <li>
+                    <a href="#__final-result__" aria-label="Final result"><strong>Final result</strong></a></li></ul>
+                </li>
+                <li>
+                    <a href="#__references__" aria-label="References"><strong>References</strong></a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/policy_gradients_title.png#center"
+         alt="title"/> 
+</figure>
+
+<hr>
+<h3 id="__notations__"><strong>Notations</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th style="text-align:left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$s_t$</td>
+<td style="text-align:left">state at timestep $t$</td>
+</tr>
+<tr>
+<td>$a_t$</td>
+<td style="text-align:left">action taken in state $s_t$</td>
+</tr>
+<tr>
+<td>$r(a_t \vert s_t)$</td>
+<td style="text-align:left">reward after taking action $a_t$ in state $s_t$</td>
+</tr>
+<tr>
+<td>$\tau$</td>
+<td style="text-align:left">a trajectory, $(s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_{T-1}, a_{T-1}, r_{T-1}, s_T)$</td>
+</tr>
+<tr>
+<td>$r(\tau)$</td>
+<td style="text-align:left">$\sum_{t}r(a_{t}, s_{t})$</td>
+</tr>
+<tr>
+<td>$\pi_\theta(\tau)$</td>
+<td style="text-align:left">probability of tajectory $\tau$ under policy $\pi_\theta$ with parameters $\theta$</td>
+</tr>
+<tr>
+<td>$\gamma$</td>
+<td style="text-align:left">discount factor</td>
+</tr>
+</tbody>
+</table>
+<h3 id="__theory__"><strong>Theory</strong></h3>
+<p>Policy gradient methods try to solve reinforcement learning problems by modelling the policy as a parameterized function, generally a neural network. The policy network takes in observations as inputs and returns a distribution over available actions as output. An action from this distribution is sampled and a reward is received after the action is taken. The goal of policy gradient methods is to maximize (or minimize the negative of) an objective function which depends on the actions taken and rewards received over multiple timesteps. Our objective function, $J(θ)$ is the expectation of returns over all trajectories under policy $\pi_\theta$. We find the gradient of the objective functions w.r.t. the parameters of policy network and make updates.</p>
+<p>$$J(\theta) = \mathbb{E}_{\tau \sim \pi {\theta}(\tau)  \bigg[ \sum_tr(a_t, s_t) \bigg] \tag{1}\label{eq:1}}$$</p>
+<p>where,</p>
+<p>$$
+\begin{align}
+\pi_\theta(\tau) &amp;= p(s_1)\sum_{t=1}^{T} \pi_\theta(a_t \vert s_t)p(s_{t+1} \vert s_t, a_T) \newline
+\log \pi_\theta(\tau) &amp;= \log p(s_1) + \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) + \log p(s_{t+1} \vert s_t, a_T)
+\end{align}
+$$</p>
+<p>The gradient of $J(\theta)$ has the following form.</p>
+<p>$$
+= \mathbb{E}<em>{\tau \sim \pi {\theta}(\tau)} \bigg[ \bigg( \sum</em>{t=1}^{T} \nabla_\theta\log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{2}\label{eq:2}
+$$</p>
+<!-- $$
+\begin{align}
+    \nabla_\theta J(\theta)  &= \int \nabla_\theta \pi_\theta(\tau)r(\tau)d(\tau) 
+  \\ &= \int \pi_\theta(\tau) \nabla_\theta \log\pi_\theta(\tau)r(\tau)d(\tau)
+  \\ &= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \big[ \nabla_\theta \log\pi_\theta(\tau)r(\tau) \big]
+  \\ &= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \bigg[ \bigg(\sum_{t=1}^{T} \nabla_\theta\log\pi_\theta(a_t \vert s_t)\bigg) r(\tau) \bigg]
+  \\ &= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \bigg[ \bigg( \sum_{t=1}^{T} \nabla_\theta\log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{2}\label{eq:2}
+\end{align}
+$$ -->
+<p>Computing this expectation under a distribution over all trajectories is intractable, so we use sampling instead to make an approximation.</p>
+<p>$$\nabla_\theta J(\theta) \approx \frac {1}{N} \sum_{i=1}^{N} \bigg[ \bigg( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{3}\label{eq:3}$$</p>
+<p>A simple policy gradient algorithm repeats the following steps:</p>
+<ol>
+<li>Sample $\tau^{i}$ from $\pi_\theta(a_t \vert s_t)$</li>
+<li>Compute $\nabla_\theta J(\theta) \approx \frac {1}{N} \sum_{i} \big( ( \sum_{t} \nabla_\theta\log\pi_\theta(a_t \vert s_t) ) \sum_{t=1}^{T}r(a_{it}, s_{it}) \big)$</li>
+<li>Update $\theta \leftarrow \theta + \alpha \nabla_\theta J(\theta)$</li>
+</ol>
+<p>This simple algorithm is prone to variance. While training policy gradients, there are certain methods used to reduce such variance. These methods usually make small changes in the objective function. In the following sections, the effects of these methods is demonstrated on CartPole-v0 environment.</p>
+<p><strong>Practical consideration:</strong> Computing $\nabla_\theta\log\pi_\theta(a_t \vert s_t)$ explicitly is inefficient. We instead compute
+$$\tilde{J}(\theta) \approx \frac {1}{N} \sum_{i=1}^{N} \bigg[ \bigg( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{4}\label{eq:4}$$
+and use automatic differentiation to compute policy gradients.</p>
+<h3 id="__cartpole-v0__"><strong>CartPole-v0</strong></h3>
+<p><a href="https://github.com/openai/gym/wiki/CartPole-v0">CartPole-v0</a> is an OpenAI gym environment where a pole is attached to a cart. The cart can move along a frictionless track. The goal is to prevent the pole from falling.  CartPole-v0 observations are arrays of 4 values - cart position, cart velocity, pole angle and pole velocity at the top. The action is a discrete value - 0 (push cart to the left) or 1 (push cart to the right). The top limit on the number of steps that can occur in one episode is 200. There is another version, CartPole-v1 with 500 steps as max limit but experiments in this article will be based on CartPole-v0.</p>
+<h3 id="__experiment-details__"><strong>Experiment details</strong></h3>
+<ul>
+<li><strong>Policy network:</strong> inputs of dimensions (batch size, 4); 2 hidden layers of size 64 each; output dimensions of (batch size, 2); learning rate of 0.001 with Adam optimizer</li>
+<li><strong>Baseline network:</strong> input of dimensions (batch size, 4); 2 hidden layers of size 64 each; output dimensions of (batch size, 1); learning rate of 0.001 with Adam optimizer</li>
+<li><strong>Discount factor:</strong> 0.99</li>
+<li><strong>Random seeds:</strong> All experiments are performed thrice with numpy, pytorch and gym seeds as 0, 10 and 20. Results are averaged.</li>
+<li><strong>Number of iterations:</strong> 1000. One iteration means using a batch to make one policy update.</li>
+<li><strong>Plots:</strong> Average of returns in a batch vs iterations.</li>
+</ul>
+<h4 id="__batch-size__"><strong>Batch size</strong></h4>
+<p>Batch size refers to the number of timesteps used to make an update to policy network. When only a single timestep is used, the algorithm is called REINFORCE. Here, comparison is done between three batch sizes:</p>
+<ol>
+<li>At least 1. Only a single episode is run.</li>
+<li>At least 500. Episodes are run until we get 500 timesteps.</li>
+<li>At least 1000. Episodes are run until we get 1000 timesteps.</li>
+</ol>
+<p>It is possible that we receive required minimum timesteps (1, 500 or 1000) in the middle of an episode but we still run the episode till the end and use all the timesteps from that episode in the batch. This leads us to having some extra timsteps in our batch. If we stop the episode in the middle, then the returns we get will be lower than actual returns. Now, let&rsquo;s run our algorithm to maximize \eqref{eq:4}.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/2l_64s_1b_0na_0rtg_0nnb_0.99g_0.001lr.jpg#center"
+         alt="2l_64s_1b_0na_0rtg_0nnb_0.99g_0.001lr"/> <figcaption>
+            <p><em>Policy update using at least 1 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<p>We can see that average returns of the batches are not consistent and have a lot of variance. Also, notice that the results are sensitive to random seeds as well. On increasing the batch size to 500, we get a considerable reduction in variance and also, a faster increase in average returns.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/2l_64s_500b_0na_0rtg_0nnb_0.99g_0.001lr.jpg#center"
+         alt="2l_64s_500b_0na_0rtg_0nnb_0.99g_0.001lr"/> <figcaption>
+            <p><em>Policy update using at least 500 timesteps.</em></p>
+        </figcaption>
+</figure>
+
+<p>There are still inconsistencies around higher rewards. Using a batch size of 1000 gives us a smoother curve. These results were observed without using discounted returns. Next, we&rsquo;ll change our objective function to use causality and discounted returns.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/2l_64s_1000b_0na_0rtg_0nnb_0.99g_0.001lr.jpg#center"
+         alt="2l_64s_1000b_0na_0rtg_0nnb_0.99g_0.001lr"/> <figcaption>
+            <p><em>Policy update using at least 1000 timesteps.</em></p>
+        </figcaption>
+</figure>
+
+<h4 id="__causality-and-reward-to-go__"><strong>Causality and reward-to-go</strong></h4>
+<p>In the objective function used above, log probabilities of all taken actions are multiplied by sum of rewards. But policy at timestep $t&rsquo;$ cannot affect reward at timestep $t$ when $t &lt; t&rsquo;$. So we modify the objective function to:</p>
+<p>$$\tilde{J}(\theta) \approx \frac{1}{N}\sum_{i=1}^{N} \bigg(\sum_{t=1}^{T}\log\pi_\theta(a_{it}\vert s_{it})\bigg)\bigg(\sum_{t’=t}^{T} r(a_{it’}\vert s_{it’})\bigg)\tag{5}\label{eq:5}$$</p>
+<p>Also, rewards received much later in future should have lesser contribution to returns than rewards received in near future. So, we use discounted returns to incorporate this dynamic behaviour.</p>
+<p>$$\tilde{J}(\theta) \approx \frac{1}{N}\sum_{i=1}^{N} \bigg(\sum_{t=1}^{T}\log\pi_\theta(a_{it}\vert s_{it})\bigg)\bigg(\sum_{t’=t}^{T} \gamma^{t’-t} r(a_{it’}\vert s_{it’})\bigg)\tag{6}\label{eq:6}$$</p>
+<p>On using causality and reward-to-go, our policy learns faster and reaches the maximum of average returns in fewer timesteps.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/rtg_nortg_1.jpg#center"
+         alt="rtg_nortg_1"/> <figcaption>
+            <p><em>Reward-to-go (yellow) vs no reward-to-go (blue) using at least 1 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/rtg_nortg_500.jpg#center"
+         alt="rtg_nortg_500"/> <figcaption>
+            <p><em>Reward-to-go (yellow) vs no reward-to-go (blue) using at least 500 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/rtg_nortg_1000.jpg#center"
+         alt="rtg_nortg_1000"/> <figcaption>
+            <p><em>Reward-to-go (yellow) vs no reward-to-go (blue) using at least 1000 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<h4 id="__baselines__"><strong>Baselines</strong></h4>
+<p>A popular variation of the objective function to reduce variance of gradient function is to subtract a baseline from the returns. A common baseline to subtract is state-value function and the resulting value is called advantage.</p>
+<p>$$\tilde{J}(\theta) \approx \frac {1}{N} \sum_{i=1}^{N} \bigg[ \bigg( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \bigg) \bigg(\sum_{t&rsquo;=t}^{T}r(a_{it}, s_{it}) - b\bigg) \bigg]\tag{7}\label{eq:7}$$</p>
+<p>We now optimize \eqref{eq:7} using a neural network baseline</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/nnb_nonnb_1.jpg#center"
+         alt="nnb_nonnb_1"/> <figcaption>
+            <p><em>Baseline (yellow) vs no baseline (blue) using at least 1 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/nnb_nonnb_500.jpg#center"
+         alt="nnb_nonnb_500"/> <figcaption>
+            <p><em>Baseline (yellow) vs no baseline (blue) using at least 500 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/nnb_nonnb_1000.jpg#center"
+         alt="nnb_nonnb_1000"/> <figcaption>
+            <p><em>Baseline (yellow) vs no baseline (blue) using at least 1000 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<p>Training plots show that baseline method works better for large batch sizes. It does not seem to work with small batch sizes (or when our batch consists of only one episosde).</p>
+<h4 id="__advantage-normalization__"><strong>Advantage normalization</strong></h4>
+<p>Another trick to make policy gradients work is normalizing returns or advantage (in case of baselines). Following are the results of normalizing returns, baselines were not used in this case.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/na_nona_1.jpg#center"
+         alt="na_nona_1"/> <figcaption>
+            <p><em>Normalization (yellow) vs no normalization (blue) using at least 1 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/na_nona_500.jpg#center"
+         alt="na_nona_500"/> <figcaption>
+            <p><em>Normalization (yellow) vs no normalization (blue) using at least 500 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/na_nona_1000.jpg#center"
+         alt="na_nona_1000"/> <figcaption>
+            <p><em>Normalization (yellow) vs no normalization (blue) using at least 1000 timestep.</em></p>
+        </figcaption>
+</figure>
+
+<h4 id="__final-result__"><strong>Final result</strong></h4>
+<p>This time we use everything we have in our toolset - causality, reward-to-go, baselines and advantage normalization.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_sum/final.jpg#center"
+         alt="final"/> <figcaption>
+            <p><em>Using causality, reward-to-go, baselines and advantage normalization.</em></p>
+        </figcaption>
+</figure>
+
+<p>You can see that our small batch size is performing poorly due to added baseline.</p>
+<p>Is there a fix to make baseline work with smaller batches? So far, we have used the objective function of the form</p>
+<p>$$\tilde{J}(\theta) \approx \frac {1}{N} \sum_{i=1}^{N} \big[ \big( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \big) \sum_{t}r(a_{t}, s_{t}) \big]$$</p>
+<p>which can be thought of as an average of returns over sampled trajectories. We can instead use average of returns over all timesteps i.e.</p>
+<p>$$\tilde{J}(\theta) \approx \frac {1}{\tilde{T}} \sum_{i=1}^{N} \bigg[ \bigg( \sum_{t=1}^{T} \log\pi_\theta(a_t \vert s_t) \bigg) \sum_{t}r(a_{t}, s_{t}) \bigg]\tag{8}\label{eq:8}$$</p>
+<p>where $\tilde{T}$ is total timesteps in a batch. Optimizing \eqref{eq:8} fixes the baseline inconsistency for small batches.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2019-06-05-training-policy-gradients/loss_mean/final.jpg#center"
+         alt="final_mean"/> <figcaption>
+            <p><em>Using average of returns over all timesteps.</em></p>
+        </figcaption>
+</figure>
+
+<h3 id="__references__"><strong>References</strong></h3>
+<ol>
+<li><a href="http:////rail.eecs.berkeley.edu/deeprlcourse/">Berkeley Deep RL Course</a></li>
+<li><a href="https://lilianweng.github.io/lil-log/2018/04/08/policy-gradient-algorithms.html">Policy Gradient Algorithms</a></li>
+<li><a href="https://danieltakeshi.github.io/2017/03/28/going-deeper-into-reinforcement-learning-fundamentals-of-policy-gradients/">Going Deeper Into Reinforcement Learning: Fundamentals of Policy Gradients</a></li>
+</ol>
+
+  </div>
+
+  <footer class="post-footer">
+<nav class="paginav">
+  <a class="next" href="https://scholarstree.github.io/posts/2018-04-27-tharoor-it/2018-04-27-tharoor-it/">
+    <span class="title">Next Page&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right" style="user-select: text;"><line x1="5" y1="12" x2="19" y2="12" style="user-select: text;"></line><polyline points="12 5 19 12 12 19" style="user-select: text;"></polyline></svg>
+    </span>
+    <br>
+    <span>Tharoor It</span>
+  </a>
+</nav>
+
+  </footer><div class="comments-box">
+  <div id="disqus_thread"></div>
+</div>
+
+<script type="text/javascript">
+  var disqus_config = function () {
+    this.page.url = 'https:\/\/scholarstree.github.io\/posts\/2019-06-05-training-policy-gradients\/2019-06-05-training-policy-gradients\/';  
+    this.page.identifier = '2019-06-05-training-policy-gradients'; 
+  };
+
+  (function () {
+    const disqus = window.DISQUS
+    if (disqus) {
+      
+      
+      disqus.reset({
+        reload: true,
+        config: disqus_config,
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = '//' + 'scholarstree' + '.disqus.com/embed.js';
+      s.defer = true;
+      s.setAttribute('data-timestamp', +new Date());
+      
+      s.setAttribute('data-no-instant', '')
+      d.head.appendChild(s);
+    }
+  })();
+</script>
+
+</article>
+    </main>
+    
+<footer class="footer">
+  <span>&copy; 2022 <a href="https://scholarstree.github.io/">Scholarstree</a></span><span style="display: inline-block; margin-left: 1em;">
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/"></a>
+  </span>
+  <span style="display: inline-block; margin-left: 1em;">
+    Powered by
+    <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+    <a href="https://github.com/reorx/hugo-PaperModX/" rel="noopener" target="_blank">PaperModX</a>
+  </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+    <path d="M12 6H0l6-6z" />
+  </svg>
+</a>
+
+<script>
+  (function() {
+     
+    const disableThemeToggle = '' == '1';
+    if (disableThemeToggle) {
+      return;
+    }
+
+    let button = document.getElementById("theme-toggle")
+    
+    button.removeEventListener('click', toggleThemeListener)
+    
+    button.addEventListener('click', toggleThemeListener)
+  })();
+</script>
+
+<script>
+  (function () {
+    let menu = document.getElementById('menu')
+    if (menu) {
+      menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+      menu.onscroll = function () {
+        localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+      }
+    }
+
+    const disableSmoothScroll = '' == '1';
+    const enableInstantClick = '1' == '1';
+    
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || disableSmoothScroll || enableInstantClick) {
+      return;
+    }
+    
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener("click", function (e) {
+        e.preventDefault();
+        var id = this.getAttribute("href").substr(1);
+        document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+          behavior: "smooth"
+        });
+        if (id === "top") {
+          history.replaceState(null, null, " ");
+        } else {
+          history.pushState(null, null, `#${id}`);
+        }
+      });
+    });
+  })();
+</script>
+<script>
+  var mybutton = document.getElementById("top-link");
+  window.onscroll = function () {
+    if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+      mybutton.style.visibility = "visible";
+      mybutton.style.opacity = "1";
+    } else {
+      mybutton.style.visibility = "hidden";
+      mybutton.style.opacity = "0";
+    }
+  };
+</script>
+<script>
+  if (window.scrollListeners) {
+    
+    for (const listener of scrollListeners) {
+      window.removeEventListener('scroll', listener)
+    }
+  }
+  window.scrollListeners = []
+</script>
+
+
+
+<script src="/js/medium-zoom.min.js" data-no-instant
+></script>
+<script>
+  document.querySelectorAll('pre > code').forEach((codeblock) => {
+    const container = codeblock.parentNode.parentNode;
+
+    const copybutton = document.createElement('button');
+    copybutton.classList.add('copy-code');
+    copybutton.innerText = 'copy';
+
+    function copyingDone() {
+      copybutton.innerText = 'copied!';
+      setTimeout(() => {
+        copybutton.innerText = 'copy';
+      }, 2000);
+    }
+
+    copybutton.addEventListener('click', (cb) => {
+      if ('clipboard' in navigator) {
+        navigator.clipboard.writeText(codeblock.textContent);
+        copyingDone();
+        return;
+      }
+
+      const range = document.createRange();
+      range.selectNodeContents(codeblock);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      try {
+        document.execCommand('copy');
+        copyingDone();
+      } catch (e) { };
+      selection.removeRange(range);
+    });
+
+    if (container.classList.contains("highlight")) {
+      container.appendChild(copybutton);
+    } else if (container.parentNode.firstChild == container) {
+      
+    } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+      
+      codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+    } else {
+      
+      codeblock.parentNode.appendChild(copybutton);
+    }
+  });
+</script>
+
+
+
+
+<script>
+  
+  
+  (function() {
+    const enableTocScroll = '1' == '1'
+    if (!enableTocScroll) {
+      return
+    }
+    if (!document.querySelector('.toc')) {
+      console.log('no toc found, ignore toc scroll')
+      return
+    }
+    
+
+    
+    const scrollListeners = window.scrollListeners
+    const headings = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id]');
+    const activeClass = 'active';
+
+    
+    let activeHeading = headings[0];
+    getLinkByHeading(activeHeading).classList.add(activeClass);
+
+    const onScroll = () => {
+      const passedHeadings = [];
+      for (const h of headings) {
+        
+        if (getOffsetTop(h) < 5) {
+          passedHeadings.push(h)
+        } else {
+          break;
+        }
+      }
+      if (passedHeadings.length > 0) {
+        newActiveHeading = passedHeadings[passedHeadings.length - 1];
+      } else {
+        newActiveHeading = headings[0];
+      }
+      if (activeHeading != newActiveHeading) {
+        getLinkByHeading(activeHeading).classList.remove(activeClass);
+        activeHeading = newActiveHeading;
+        getLinkByHeading(activeHeading).classList.add(activeClass);
+      }
+    }
+
+    let timer = null;
+    const scrollListener = () => {
+      if (timer !== null) {
+        clearTimeout(timer)
+      }
+      timer = setTimeout(onScroll, 50)
+    }
+    window.addEventListener('scroll', scrollListener, false);
+    scrollListeners.push(scrollListener)
+
+    function getLinkByHeading(heading) {
+      const id = encodeURI(heading.getAttribute('id')).toLowerCase();
+      return document.querySelector(`.toc ul li a[href="#${id}"]`);
+    }
+
+    function getOffsetTop(heading) {
+      if (!heading.getClientRects().length) {
+        return 0;
+      }
+      let rect = heading.getBoundingClientRect();
+      return rect.top
+    }
+  })();
+  </script>
+<script>
+  mediumZoom('.entry-cover img');
+  mediumZoom('.post-content img:not([no-zoom])');
+</script>
+
+<script src="/js/instantclick.min.js" data-no-instant
+></script>
+<script data-no-instant>
+  
+  
+  
+  
+  
+  
+  InstantClick.init();
+</script>
+</body>
+
+</html>

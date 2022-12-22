@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>cv on Scholarstree</title>
+    <link>https://scholarstree.github.io/tags/cv/</link>
+    <description>Recent content in cv on Scholarstree</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 03 Feb 2018 13:15:56 +0630</lastBuildDate><atom:link href="https://scholarstree.github.io/tags/cv/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>t-SNE Visualization of Instagram Posts</title>
+      <link>https://scholarstree.github.io/posts/2018-02-03-tsne-visualization-of-instagram-posts/2018-02-03-tsne-visualization-of-instagram-posts/</link>
+      <pubDate>Sat, 03 Feb 2018 13:15:56 +0630</pubDate>
+      
+      <guid>https://scholarstree.github.io/posts/2018-02-03-tsne-visualization-of-instagram-posts/2018-02-03-tsne-visualization-of-instagram-posts/</guid>
+      <description>Visualization instagram images in a square grid.</description>
+      <content:encoded><![CDATA[<figure class="align-center ">
+    <img loading="lazy" src="/2018-02-03-tsne-visualization-of-instagram-posts/tsne_title.jpeg#center"
+         alt="tsne_title"/> 
+</figure>
+
+<hr>
+<p>A year ago, I read <a href="https://karpathy.github.io/2015/10/25/selfie/">Andrej&rsquo;s blog</a> post where he analyzed selfies using Convolutional Neural Networks. I was intrigued by the visualization technique he used which grouped images in such a way that nearby images were similar. In this post, I visualised my own collection of images in a square grid.</p>
+<h3 id="steps-involved">Steps Involved</h3>
+<p>t-Distributed Stochastic Neighbor Embedding (t-SNE) is a technique for visualizing high dimensional data in 2D or 3D. It defines a cost function between a joint probability distribution,P, in the high-dimensional space and a joint probability distribution, Q, in the low-dimensional space and minimizes that cost function. In this case, we&rsquo;re plotting images but it can be used with all other kinds of data.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2018-02-03-tsne-visualization-of-instagram-posts/tsne_mnist.png#center"
+         alt="tsne_mnist"/> <figcaption>
+            <p><em>t-SNE visualization of MNIST data.</em></p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/2018-02-03-tsne-visualization-of-instagram-posts/tsne_mnist_grid.jpeg#center"
+         alt="tsne_jpeg"/> <figcaption>
+            <p><em>t-SNE visualization of MNIST data in a grid. (Not related to the previous visualization).</em></p>
+        </figcaption>
+</figure>
+
+<p>The full script can be found <a href="https://github.com/scholarstree/tsne-grid">here</a>. The script requires keras and tensorflow. It is tested with tensorflow (1.4.0) and keras (2.1.1).</p>
+<p><strong>Build model</strong>: VGG16 network (without top fc layers) is used and outputs of last conv block are flattened to form a vector.</p>
+<p><strong>Load images</strong>: All the images from the source directory are loaded.</p>
+<p><strong>Generate high dimensional representations</strong>: A single forward pass through the network generates the high dimensional representations.</p>
+<p><strong>Get 2D point locations</strong>: t-SNE implementation of scikit-learn converts these representations to 2D data points.</p>
+<p><strong>Distribute 2D representations in a square grid and save images</strong>: Finally, jonker-volgenant algorithm distributes these 2D points into a square grid and we assign every point in the grid a small image.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/2018-02-03-tsne-visualization-of-instagram-posts/tsne_rand.jpeg#center"
+         alt="tsne_rand"/> <figcaption>
+            <p><em>t-SNE visualization of some random images in a grid.</em></p>
+        </figcaption>
+</figure>
+
+<h3 id="system-details">System Details</h3>
+<p>HP Pavilion<br>
+4 GB RAM<br>
+Nvidia GeForce GT 740M</p>
+<h3 id="__references__"><strong>References</strong></h3>
+<ol>
+<li>L.J.P. van der Maaten and G.E. Hinton. Visualizing High-Dimensional Data Using t-SNE. Journal of Machine Learning Research 9(Nov):2579–2605, 2008.<a href="https://lvdmaaten.github.io/publications/papers/JMLR_2008.pdf">[PDF]</a><a href="https://lvdmaaten.github.io/publications/misc/Supplement_JMLR_2008.pdf">[Supplemental material]</a><a href="https://www.youtube.com/watch?v=RJVL80Gg3lA&amp;list=UUtXKDgv1AVoG88PLl8nGXmw">[Talk]</a><a href="https://lvdmaaten.github.io/tsne/">[Code]</a></li>
+</ol>
+]]></content:encoded>
+    </item>
+    
+  </channel>
+</rss>
