@@ -2,28 +2,40 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://scholarstree.github.io/posts/2023-01-05-notes/2023-01-05-notes/</loc>
+    <lastmod>2023-01-04T12:00:00+05:30</lastmod>
+  </url><url>
     <loc>https://scholarstree.github.io/categories/</loc>
-    <lastmod>2019-06-05T20:17:37+05:30</lastmod>
+    <lastmod>2023-01-04T12:00:00+05:30</lastmod>
+  </url><url>
+    <loc>https://scholarstree.github.io/categories/computer-vision/</loc>
+    <lastmod>2023-01-04T12:00:00+05:30</lastmod>
+  </url><url>
+    <loc>https://scholarstree.github.io/tags/cv/</loc>
+    <lastmod>2023-01-04T12:00:00+05:30</lastmod>
+  </url><url>
+    <loc>https://scholarstree.github.io/categories/development/</loc>
+    <lastmod>2023-01-04T12:00:00+05:30</lastmod>
   </url><url>
     <loc>https://scholarstree.github.io/categories/machine-learning/</loc>
-    <lastmod>2019-06-05T20:17:37+05:30</lastmod>
-  </url><url>
-    <loc>https://scholarstree.github.io/tags/policygradients/</loc>
-    <lastmod>2019-06-05T20:17:37+05:30</lastmod>
+    <lastmod>2023-01-04T12:00:00+05:30</lastmod>
   </url><url>
     <loc>https://scholarstree.github.io/posts/</loc>
+    <lastmod>2023-01-04T12:00:00+05:30</lastmod>
+  </url><url>
+    <loc>https://scholarstree.github.io/</loc>
+    <lastmod>2023-01-04T12:00:00+05:30</lastmod>
+  </url><url>
+    <loc>https://scholarstree.github.io/tags/</loc>
+    <lastmod>2023-01-04T12:00:00+05:30</lastmod>
+  </url><url>
+    <loc>https://scholarstree.github.io/tags/policygradients/</loc>
     <lastmod>2019-06-05T20:17:37+05:30</lastmod>
   </url><url>
     <loc>https://scholarstree.github.io/categories/reinforcement-learning/</loc>
     <lastmod>2019-06-05T20:17:37+05:30</lastmod>
   </url><url>
     <loc>https://scholarstree.github.io/tags/rl/</loc>
-    <lastmod>2019-06-05T20:17:37+05:30</lastmod>
-  </url><url>
-    <loc>https://scholarstree.github.io/</loc>
-    <lastmod>2019-06-05T20:17:37+05:30</lastmod>
-  </url><url>
-    <loc>https://scholarstree.github.io/tags/</loc>
     <lastmod>2019-06-05T20:17:37+05:30</lastmod>
   </url><url>
     <loc>https://scholarstree.github.io/posts/2019-06-05-training-policy-gradients/2019-06-05-training-policy-gradients/</loc>
@@ -52,12 +64,6 @@
   </url><url>
     <loc>https://scholarstree.github.io/tags/tech/</loc>
     <lastmod>2018-03-10T12:00:00+05:30</lastmod>
-  </url><url>
-    <loc>https://scholarstree.github.io/categories/computer-vision/</loc>
-    <lastmod>2018-02-03T13:15:56+06:30</lastmod>
-  </url><url>
-    <loc>https://scholarstree.github.io/tags/cv/</loc>
-    <lastmod>2018-02-03T13:15:56+06:30</lastmod>
   </url><url>
     <loc>https://scholarstree.github.io/tags/t-sne/</loc>
     <lastmod>2018-02-03T13:15:56+06:30</lastmod>

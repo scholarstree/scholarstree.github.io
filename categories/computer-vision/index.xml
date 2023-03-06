@@ -6,7 +6,72 @@
     <description>Recent content in Computer Vision on Scholarstree</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 03 Feb 2018 13:15:56 +0630</lastBuildDate><atom:link href="https://scholarstree.github.io/categories/computer-vision/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 04 Jan 2023 12:00:00 +0530</lastBuildDate><atom:link href="https://scholarstree.github.io/categories/computer-vision/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How-To Notes</title>
+      <link>https://scholarstree.github.io/posts/2023-01-05-notes/2023-01-05-notes/</link>
+      <pubDate>Wed, 04 Jan 2023 12:00:00 +0530</pubDate>
+      
+      <guid>https://scholarstree.github.io/posts/2023-01-05-notes/2023-01-05-notes/</guid>
+      <description>Notes and sample codes.</description>
+      <content:encoded><![CDATA[<h2 id="tensorrt">TensorRT</h2>
+<h4 id="converion-from-onnx-to-trt">Converion from ONNX to TRT</h4>
+<pre tabindex="0"><code># Windows
+trtexec.exe --onnx=INPUT_FILE --saveEngine=OUTPUT_FILE --fp16 --verbose
+
+# Linux
+trtexec --onnx=INPUT_FILE --saveEngine=OUTPUT_FILE --fp16 --verbose
+</code></pre><h2 id="docker">Docker</h2>
+<h4 id="mount-a-directory-while-initializing-a-container">Mount a directory while initializing a container</h4>
+<pre tabindex="0"><code>docker run -it -v DIRECTORY_TO_MOUNT:MOUNT_PATH --gpus all DOCKER_IMAGE
+</code></pre><h2 id="onnx">ONNX</h2>
+<h4 id="modify-inputoutput-dimensions">Modify Input/Output Dimensions</h4>
+<pre tabindex="0"><code>import onnx
+model = onnx.load(ONNX_INPUT_FILE)
+
+print(model.graph.input)
+print(model.graph.output)
+
+# change input dimensions as per model architecture
+inputs = model.graph.input
+for input in inputs:
+    input.type.tensor_type.shape.dim[0].dim_value = 8 # BATCH SIZE
+    # input.type.tensor_type.shape.dim[1].dim_value = 416
+    # input.type.tensor_type.shape.dim[2].dim_value = 416
+    # input.type.tensor_type.shape.dim[3].dim_value = 3
+
+# change output dimensions as per model architecture
+outputs = model.graph.output
+for output in outputs:
+    output.type.tensor_type.shape.dim[0].dim_value = 8 # BATCH SIZE
+    # output.type.tensor_type.shape.dim[1].dim_value = 7
+
+onnx.save(model, ONNX_OUTPUT_FILE)
+</code></pre><h4 id="fold-constants">Fold constants</h4>
+<pre tabindex="0"><code>polygraphy surgeon sanitize --fold-constants INPUT_FILE -o OUTPUT_FILE
+</code></pre><h2 id="python">Python</h2>
+<h4 id="make-a-requirementstxt-for-a-project">Make a requirements.txt for a project</h4>
+<pre tabindex="0"><code>pip install pipreqs
+pipreqs
+</code></pre><h4 id="compile-py-to-binary-pyc">Compile .py to binary .pyc</h4>
+<pre><code># <i>PYTHON</i>
+
+import argparse
+import py_compile
+
+py_compile.compile(INPUT_FILE, cfile=OUTPUT_FILE)
+</code></pre>
+<h4 id="convert-to-executable">Convert to executable</h4>
+<pre tabindex="0"><code>pyinstaller -F FILE_NAME.py --hidden-import=FILE_NAME --hidden-import=OTHER_HIDDEN_IMPORTS
+</code></pre><h2 id="fastapi">FastAPI</h2>
+<pre tabindex="0"><code># For FILE_NAME.py containing application name as app
+uvicorn FILE_NAME:app --reload --port PORT --workers=NUM_WORKERS
+</code></pre><h2 id="windows">Windows</h2>
+<h4 id="install-a-service-from-an-executable">Install a service from an executable</h4>
+<pre tabindex="0"><code>nssm.exe install SERVICE_NAME EXE_PATH
+</code></pre>]]></content:encoded>
+    </item>
+    
     <item>
       <title>t-SNE Visualization of Instagram Posts</title>
       <link>https://scholarstree.github.io/posts/2018-02-03-tsne-visualization-of-instagram-posts/2018-02-03-tsne-visualization-of-instagram-posts/</link>
