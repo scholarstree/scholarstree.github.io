@@ -55,7 +55,7 @@
   "keywords": [
     "cv"
   ],
-  "wordCount" : "174",
+  "wordCount" : "329",
   "inLanguage": "en",
   "datePublished": "2023-01-04T12:00:00+05:30",
   "dateModified": "2023-01-04T12:00:00+05:30",
@@ -272,7 +272,7 @@ function toggleThemeListener() {
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon" style="user-select: text;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" style="user-select: text;"></path><line x1="7" y1="7" x2="7" y2="7" style="user-select: text;"></line></svg>
   <span class="post-tags"><a href="https://scholarstree.github.io/tags/cv/">cv</a></span></span><span class="meta-item">
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 15"></polyline></svg>
-  <span>1 min</span></span>
+  <span>2 min</span></span>
 
       
       
@@ -305,6 +305,8 @@ function toggleThemeListener() {
                         <ul>
                         
                 <li>
+                    <a href="#converion-form-pytorch-to-onnx" aria-label="Converion form PyTorch to ONNX">Converion form PyTorch to ONNX</a></li>
+                <li>
                     <a href="#modify-inputoutput-dimensions" aria-label="Modify Input/Output Dimensions">Modify Input/Output Dimensions</a></li>
                 <li>
                     <a href="#fold-constants" aria-label="Fold constants">Fold constants</a></li></ul>
@@ -324,6 +326,16 @@ function toggleThemeListener() {
                 </li>
                 <li>
                     <a href="#fastapi" aria-label="FastAPI">FastAPI</a></li>
+                <li>
+                    <a href="#ffmpeg" aria-label="FFMPEG">FFMPEG</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#video-file-commands" aria-label="Video file commands">Video file commands</a></li>
+                <li>
+                    <a href="#rtsp-stream-commands" aria-label="RTSP stream commands">RTSP stream commands</a></li></ul>
+                    </ul>
+                </li>
                 <li>
                     <a href="#windows" aria-label="Windows">Windows</a><ul>
                         <ul>
@@ -346,11 +358,31 @@ trtexec.exe --onnx=INPUT_FILE --saveEngine=OUTPUT_FILE --fp16 --verbose
 
 # Linux
 trtexec --onnx=INPUT_FILE --saveEngine=OUTPUT_FILE --fp16 --verbose
-</code></pre><h2 id="docker">Docker</h2>
+</code></pre><p> </p>
+<h2 id="docker">Docker</h2>
 <h4 id="mount-a-directory-while-initializing-a-container">Mount a directory while initializing a container</h4>
 <pre tabindex="0"><code>docker run -it -v DIRECTORY_TO_MOUNT:MOUNT_PATH --gpus all DOCKER_IMAGE
-</code></pre><h2 id="onnx">ONNX</h2>
-<h4 id="modify-inputoutput-dimensions">Modify Input/Output Dimensions</h4>
+</code></pre><p> </p>
+<h2 id="onnx">ONNX</h2>
+<h4 id="converion-form-pytorch-to-onnx">Converion form PyTorch to ONNX</h4>
+<pre tabindex="0"><code>import torch
+
+# model = DEFINE_MODEL
+model.eval() 
+
+dummy_input = torch.randn(1, INPUT_SHAPE, requires_grad=True)  
+
+torch.onnx.export(model,        
+        dummy_input,      
+        OUTPUT_FILE,      
+        export_params=True, 
+        opset_version=13,    
+        do_constant_folding=True, 
+        input_names = [&#39;modelInput&#39;], # the model&#39;s input names
+        output_names = [&#39;modelOutput&#39;], # the model&#39;s output names 
+        dynamic_axes={&#39;modelInput&#39; : {0 : &#39;batch_size&#39;},    # variable length axes 
+                            &#39;modelOutput&#39; : {0 : &#39;batch_size&#39;}}) 
+</code></pre><h4 id="modify-inputoutput-dimensions">Modify Input/Output Dimensions</h4>
 <pre tabindex="0"><code>import onnx
 model = onnx.load(ONNX_INPUT_FILE)
 
@@ -374,7 +406,8 @@ for output in outputs:
 onnx.save(model, ONNX_OUTPUT_FILE)
 </code></pre><h4 id="fold-constants">Fold constants</h4>
 <pre tabindex="0"><code>polygraphy surgeon sanitize --fold-constants INPUT_FILE -o OUTPUT_FILE
-</code></pre><h2 id="python">Python</h2>
+</code></pre><p> </p>
+<h2 id="python">Python</h2>
 <h4 id="make-a-requirementstxt-for-a-project">Make a requirements.txt for a project</h4>
 <pre tabindex="0"><code>pip install pipreqs
 pipreqs
@@ -388,10 +421,29 @@ py_compile.compile(INPUT_FILE, cfile=OUTPUT_FILE)
 </code></pre>
 <h4 id="convert-to-executable">Convert to executable</h4>
 <pre tabindex="0"><code>pyinstaller -F FILE_NAME.py --hidden-import=FILE_NAME --hidden-import=OTHER_HIDDEN_IMPORTS
-</code></pre><h2 id="fastapi">FastAPI</h2>
+</code></pre><p> </p>
+<h2 id="fastapi">FastAPI</h2>
 <pre tabindex="0"><code># For FILE_NAME.py containing application name as app
 uvicorn FILE_NAME:app --reload --port PORT --workers=NUM_WORKERS
-</code></pre><h2 id="windows">Windows</h2>
+</code></pre><p> </p>
+<h2 id="ffmpeg">FFMPEG</h2>
+<h4 id="video-file-commands">Video file commands</h4>
+<pre tabindex="0"><code># Loop a video 
+ffmpeg -stream_loop -1 -t HH:MM:SS -i INPUT_FILE -c copy OUTPUT_FILE
+</code></pre><h4 id="rtsp-stream-commands">RTSP stream commands</h4>
+<pre tabindex="0"><code># Check if RTSP stream is working
+ffprobe -v quiet -print_format json -timeout 5000000 -show_streams RTSP_LINK
+
+# Save stream in one big file
+ffmpeg -i RTSP_LINK -nostats -fflags nobuffer -vcodec copy -reset_timestamps 1 -y FILE_NAME.EXTENSION
+
+# Save stream in segments of length SEGMENT_LENGTH seconds
+ffmpeg -i RTSP_LINK -nostats -fflags nobuffer -vcodec copy -f segment -segment_time SEGMENT_LENGTH -reset_timestamps 1 -y FILE_NAME%d.EXTENSION
+
+# Create an RTSP stream from a video file
+ffmpeg -re -i VIDEO_FILE_PATH -rtsp_transport tcp -c:v copy -an -f rtsp rtsp://localhost:PORT/OPTIONAL_URL_PATH
+</code></pre><p> </p>
+<h2 id="windows">Windows</h2>
 <h4 id="install-a-service-from-an-executable">Install a service from an executable</h4>
 <pre tabindex="0"><code>nssm.exe install SERVICE_NAME EXE_PATH
 </code></pre>

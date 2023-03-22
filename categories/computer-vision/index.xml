@@ -21,11 +21,31 @@ trtexec.exe --onnx=INPUT_FILE --saveEngine=OUTPUT_FILE --fp16 --verbose
 
 # Linux
 trtexec --onnx=INPUT_FILE --saveEngine=OUTPUT_FILE --fp16 --verbose
-</code></pre><h2 id="docker">Docker</h2>
+</code></pre><p> </p>
+<h2 id="docker">Docker</h2>
 <h4 id="mount-a-directory-while-initializing-a-container">Mount a directory while initializing a container</h4>
 <pre tabindex="0"><code>docker run -it -v DIRECTORY_TO_MOUNT:MOUNT_PATH --gpus all DOCKER_IMAGE
-</code></pre><h2 id="onnx">ONNX</h2>
-<h4 id="modify-inputoutput-dimensions">Modify Input/Output Dimensions</h4>
+</code></pre><p> </p>
+<h2 id="onnx">ONNX</h2>
+<h4 id="converion-form-pytorch-to-onnx">Converion form PyTorch to ONNX</h4>
+<pre tabindex="0"><code>import torch
+
+# model = DEFINE_MODEL
+model.eval() 
+
+dummy_input = torch.randn(1, INPUT_SHAPE, requires_grad=True)  
+
+torch.onnx.export(model,        
+        dummy_input,      
+        OUTPUT_FILE,      
+        export_params=True, 
+        opset_version=13,    
+        do_constant_folding=True, 
+        input_names = [&#39;modelInput&#39;], # the model&#39;s input names
+        output_names = [&#39;modelOutput&#39;], # the model&#39;s output names 
+        dynamic_axes={&#39;modelInput&#39; : {0 : &#39;batch_size&#39;},    # variable length axes 
+                            &#39;modelOutput&#39; : {0 : &#39;batch_size&#39;}}) 
+</code></pre><h4 id="modify-inputoutput-dimensions">Modify Input/Output Dimensions</h4>
 <pre tabindex="0"><code>import onnx
 model = onnx.load(ONNX_INPUT_FILE)
 
@@ -49,7 +69,8 @@ for output in outputs:
 onnx.save(model, ONNX_OUTPUT_FILE)
 </code></pre><h4 id="fold-constants">Fold constants</h4>
 <pre tabindex="0"><code>polygraphy surgeon sanitize --fold-constants INPUT_FILE -o OUTPUT_FILE
-</code></pre><h2 id="python">Python</h2>
+</code></pre><p> </p>
+<h2 id="python">Python</h2>
 <h4 id="make-a-requirementstxt-for-a-project">Make a requirements.txt for a project</h4>
 <pre tabindex="0"><code>pip install pipreqs
 pipreqs
@@ -63,10 +84,29 @@ py_compile.compile(INPUT_FILE, cfile=OUTPUT_FILE)
 </code></pre>
 <h4 id="convert-to-executable">Convert to executable</h4>
 <pre tabindex="0"><code>pyinstaller -F FILE_NAME.py --hidden-import=FILE_NAME --hidden-import=OTHER_HIDDEN_IMPORTS
-</code></pre><h2 id="fastapi">FastAPI</h2>
+</code></pre><p> </p>
+<h2 id="fastapi">FastAPI</h2>
 <pre tabindex="0"><code># For FILE_NAME.py containing application name as app
 uvicorn FILE_NAME:app --reload --port PORT --workers=NUM_WORKERS
-</code></pre><h2 id="windows">Windows</h2>
+</code></pre><p> </p>
+<h2 id="ffmpeg">FFMPEG</h2>
+<h4 id="video-file-commands">Video file commands</h4>
+<pre tabindex="0"><code># Loop a video 
+ffmpeg -stream_loop -1 -t HH:MM:SS -i INPUT_FILE -c copy OUTPUT_FILE
+</code></pre><h4 id="rtsp-stream-commands">RTSP stream commands</h4>
+<pre tabindex="0"><code># Check if RTSP stream is working
+ffprobe -v quiet -print_format json -timeout 5000000 -show_streams RTSP_LINK
+
+# Save stream in one big file
+ffmpeg -i RTSP_LINK -nostats -fflags nobuffer -vcodec copy -reset_timestamps 1 -y FILE_NAME.EXTENSION
+
+# Save stream in segments of length SEGMENT_LENGTH seconds
+ffmpeg -i RTSP_LINK -nostats -fflags nobuffer -vcodec copy -f segment -segment_time SEGMENT_LENGTH -reset_timestamps 1 -y FILE_NAME%d.EXTENSION
+
+# Create an RTSP stream from a video file
+ffmpeg -re -i VIDEO_FILE_PATH -rtsp_transport tcp -c:v copy -an -f rtsp rtsp://localhost:PORT/OPTIONAL_URL_PATH
+</code></pre><p> </p>
+<h2 id="windows">Windows</h2>
 <h4 id="install-a-service-from-an-executable">Install a service from an executable</h4>
 <pre tabindex="0"><code>nssm.exe install SERVICE_NAME EXE_PATH
 </code></pre>]]></content:encoded>
